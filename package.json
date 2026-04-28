@@ -29,12 +29,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/steam-manifest-generator"
+    "url": "https://github.com/azrh47/steam-manifest-generator"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/steam-manifest-generator/issues"
+    "url": "https://github.com/azrh47/steam-manifest-generator/issues"
   },
-  "homepage": "https://github.com/yourusername/steam-manifest-generator#readme",
+  "homepage": "https://github.com/azrh47/steam-manifest-generator#readme",
   "dependencies": {
     "@prisma/client": "^5.7.1",
     "@supabase/supabase-js": "^2.83.0",
