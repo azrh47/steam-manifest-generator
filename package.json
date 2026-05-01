@@ -97,6 +97,10 @@
     "typescript": "^5.0.0",
     "vercel": "^48.10.4"
   },
+  "overrides": {
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
   "engines": {
     "node": ">=16.11.0"
   }
