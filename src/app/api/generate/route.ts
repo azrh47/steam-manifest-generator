@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSteamAppDetails, validateAppId } from '../../../../utils/steamAPI';
-import { generateSteamManifest, formatManifest } from '../../../../utils/manifestGenerator';
-import { generateLuaScript } from '../../../../utils/luaGenerator';
+import { getSteamAppDetails, validateAppId } from '../../../../../utils/steamAPI';
+import { generateSteamManifest, formatManifest } from '../../../../../utils/manifestGenerator';
+import { generateLuaScript } from '../../../../../utils/luaGenerator';
 import { randomBytes } from 'crypto';
 
 // Fallback in-memory storage for when Supabase is not available
