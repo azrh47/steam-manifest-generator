@@ -2,6 +2,8 @@ const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { getSteamAppDetails, validateAppId } = require('../utils/steamAPI');
 const { generateSteamManifest, formatManifest } = require('../utils/manifestGenerator');
 const { generateLuaScript } = require('../utils/luaGenerator');
+const archiver = require('archiver');
+const { Buffer } = require('buffer');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -48,12 +50,25 @@ module.exports = {
       const manifestJson = formatManifest(manifest);
       const luaScript = generateLuaScript(appData);
 
+      // Create ZIP file
+      const zip = archiver('zip', { zlib: { level: 9 } });
+      const zipBuffer = [];
+
+      zip.on('data', (chunk) => zipBuffer.push(chunk));
+      
+      zip.append(manifestJson, { name: `${appData.appId}_manifest.json` });
+      zip.append(luaScript, { name: `${appData.appId}_script.lua` });
+      
+      await zip.finalize();
+      
+      const finalZipBuffer = Buffer.concat(zipBuffer);
+
       // Create main embed
       const mainEmbed = new EmbedBuilder()
         .setColor('#00FF00')
         .setTitle(`🎮 Files Generated for ${appData.name}`)
         .setURL(`https://store.steampowered.com/app/${appId}`)
-        .setDescription(`Your Steam manifest and Lua script have been generated and attached below!`)
+        .setDescription(`Your Steam manifest and Lua script have been generated in a ZIP file!`)
         .setThumbnail(appData.headerImage || null)
         .addFields(
           { name: '📋 App Information', value: `**App ID:** ${appId}\n**Developer:** ${appData.developer}\n**Publisher:** ${appData.publisher}\n**Release Date:** ${appData.releaseDate}\n**Genres:** ${appData.genres.join(', ') || 'N/A'}`, inline: false },
@@ -61,7 +76,7 @@ module.exports = {
         )
         .setTimestamp()
         .setFooter({
-          text: 'Steam Manifest Generator Bot • Files attached below',
+          text: 'Steam Manifest Generator Bot • ZIP file attached',
           iconURL: interaction.client.user.displayAvatarURL()
         });
 
@@ -76,21 +91,14 @@ module.exports = {
         }]
       };
 
-      // Send the embed with file attachments
-      const manifestBuffer = Buffer.from(manifestJson, 'utf8');
-      const luaBuffer = Buffer.from(luaScript, 'utf8');
-
+      // Send the embed with ZIP attachment
       await interaction.editReply({
         embeds: [mainEmbed],
         components: [actionButtons],
         files: [
           {
-            attachment: manifestBuffer,
-            name: `${appData.appId}_manifest.json`
-          },
-          {
-            attachment: luaBuffer,
-            name: `${appData.appId}_script.lua`
+            attachment: finalZipBuffer,
+            name: `${appData.appId}.zip`
           }
         ]
       });
