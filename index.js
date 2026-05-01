@@ -115,8 +115,20 @@ process.on('SIGTERM', () => {
   process.exit(0);
 });
 
+// Debug checks before login
+console.log("Token exists:", !!process.env.DISCORD_TOKEN);
+console.log("Token length:", process.env.DISCORD_TOKEN?.length);
+
+// Trim and validate token
+const token = process.env.DISCORD_TOKEN?.trim();
+
+if (!token) {
+  console.error("DISCORD_TOKEN is missing.");
+  process.exit(1);
+}
+
 // Login to Discord with your client's token
-client.login(process.env.DISCORD_TOKEN).catch(error => {
+client.login(token).catch(error => {
   console.error('Failed to login to Discord:', error);
   process.exit(1);
 });
