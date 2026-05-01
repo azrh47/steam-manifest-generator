@@ -6,7 +6,7 @@ let fileStorage: Map<string, any> | null = null;
 async function getFileStorage() {
   if (!fileStorage) {
     try {
-      const module = await import('../simple-generate/route');
+      const module = await import('../simple-generate/route.js');
       fileStorage = module.fileStorage;
     } catch (error) {
       console.log('⚠️ Could not import file storage:', error.message);
