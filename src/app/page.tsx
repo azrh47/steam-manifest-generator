@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
-import { Steam, Download, Shield, Clock, ExternalLink, Bot, Code, Package } from 'lucide-react';
+import { Gamepad2, Download, Shield, Clock, ExternalLink, Bot, Code, Package } from 'lucide-react';
 
 export default function Home() {
   const [appId, setAppId] = useState('');
@@ -36,7 +36,7 @@ export default function Home() {
           <div className="text-center space-y-6 max-w-4xl mx-auto">
             <div className="flex justify-center">
               <div className="p-4 bg-primary/10 rounded-full">
-                <Steam className="h-16 w-16 text-primary" />
+                <Gamepad2 className="h-16 w-16 text-primary" />
               </div>
             </div>
             
@@ -75,7 +75,7 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           <Card>
             <CardHeader>
-              <Steam className="h-8 w-8 text-primary mb-2" />
+              <Gamepad2 className="h-8 w-8 text-primary mb-2" />
               <CardTitle>Real Steam API Data</CardTitle>
               <CardDescription>
                 Fetches actual app data from Steam Store API for accurate manifest generation
@@ -229,7 +229,7 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center space-x-2 mb-4 md:mb-0">
-              <Steam className="h-6 w-6" />
+              <Gamepad2 className="h-6 w-6" />
               <span className="font-semibold">Steam Manifest Generator</span>
             </div>
             <div className="text-sm text-muted-foreground">
