@@ -209,7 +209,9 @@ function formatBytes(bytes) {
 function generateDepotTemplate(depotId, appData) {
   const currentTime = Math.floor(Date.now() / 1000);
   
-  return `"DepotBuildID"
+  // Different content for depot 2 to show variety
+  if (depotId === 228981) {
+    return `"DepotBuildID"
 {
 	"m_nBuildID"\t\t"1234567890"
 	"m_ulTimeUpdated"\t"${currentTime}"
@@ -240,14 +242,95 @@ function generateDepotTemplate(depotId, appData) {
 
 "FileMapping"
 {
+	"game.exe"\t\t"1"\t	"2"\t	"0"\t	"1234567890abcdef1234567890abcdef12345678"
+	"steam_api.dll"\t\t"3"\t	"1"\t	"0"\t	"abcdef1234567890abcdef1234567890abcdef12"
+	"game_data.bin"\t\t"4"\t	"5"\t	"0"\t	"567890abcdef1234567890abcdef1234567890ab"
+	"resources/textures.dat"\t"6"\t	"2"\t	"0"\t	"cdef1234567890abcdef1234567890abcdef1234"
+	"audio/sounds.wem"\t\t"7"\t	"3"\t	"0"\t	"234567890abcdef1234567890abcdef12345678"
+	"config/settings.ini"\t"8"\t	"1"\t	"0"\t	"34567890abcdef1234567890abcdef1234567890"
 }
 
 "FileChunks"
 {
+	"1"\t\t"a1b2c3d4e5f6789012345678901234567890abcd"
+	"2"\t\t"f1e2d3c4b5a6978012345678901234567890efgh"
+	"3"\t\t"9a8b7c6d5e4f321001234567890123456789ijkl"
+	"4"\t\t"1234abcd5678efgh9012ijkl3456mnop7890qrst"
+	"5"\t	"uvwx5678yzab9012cdef3456ghij7890klmn"
+	"6"\t	"opqr1234stuv5678wxyz9012abcd3456efgh"
+	"7"\t	"ijkl5678mnop9012qrst3456uvwx7890yzab"
+	"8"\t	"cdef1234ghij5678klmn9012opqr3456stuv"
 }
 
 "ChunkData"
 {
+	"a1b2c3d4e5f6789012345678901234567890abcd"\t	"1048576"\t	"a1b2c3d4e5f6789012345678901234567890abcd1234567890abcdef"
+	"f1e2d3c4b5a6978012345678901234567890efgh"\t	"524288"\t	"f1e2d3c4b5a6978012345678901234567890efgh1234567890abcdef"
+	"9a8b7c6d5e4f321001234567890123456789ijkl"\t	"2097152"\t	"9a8b7c6d5e4f321001234567890123456789ijkl1234567890abcdef"
+	"1234abcd5678efgh9012ijkl3456mnop7890qrst"\t	"4194304"\t	"1234abcd5678efgh9012ijkl3456mnop7890qrst1234567890abcdef"
+	"uvwx5678yzab9012cdef3456ghij7890klmn"\t	"1048576"\t	"uvwx5678yzab9012cdef3456ghij7890klmn1234567890abcdef"
+	"opqr1234stuv5678wxyz9012abcd3456efgh"\t	"2097152"\t	"opqr1234stuv5678wxyz9012abcd3456efgh1234567890abcdef"
+	"ijkl5678mnop9012qrst3456uvwx7890yzab"\t	"524288"\t	"ijkl5678mnop9012qrst3456uvwx7890yzab1234567890abcdef"
+	"cdef1234ghij5678klmn9012opqr3456stuv"\t	"262144"\t	"cdef1234ghij5678klmn9012opqr3456stuv1234567890abcdef"
+}
+`;
+  }
+  
+  // Default depot template
+  return `"DepotBuildID"
+{
+	"m_nBuildID"\t\t"1234567890"
+	"m_ulTimeUpdated"\t"${currentTime}"
+}
+
+"Manifest"
+{
+	"m_nManifestID"\t"${Math.random().toString(36).substring(2, 15)}"
+	"m_nFileCount"\t"80"
+	"m_nTotalSizeUncompressed"\t"800000000"
+	"m_nTotalSizeCompressed"\t"600000000"
+	"m_nEncryptedSize"\t"0"
+	"m_bFileDataHashIncluded"\t"1"
+	"m_nAppID"\t"${appData.appId}"
+	"m_nDepotID"\t"${depotId}"
+	"m_nLastContentManifest"\t"0"
+	"m_nChunkManifest"\t"0"
+	"m_nDownloadSizeManifest"\t"0"
+	"m_nSignatureSize"\t"256"
+	"m_bRequiresDownloadSubdirectory"\t"0"
+	"m_bUserSpecific"\t"0"
+	"m_bLegacyMapping"\t"0"
+	"m_nFileMappingInfoSize"\t"0"
+	"m_nFileMappingInfoCompressedSize"\t"0"
+	"m_bAppManifest"\t"0"
+	"m_bPatchFile"\t"0"
+}
+
+"FileMapping"
+{
+	"engine.dll"\t\t"1"\t	"1"\t	"0"\t	"fedcba0987654321fedcba0987654321fedcba09"
+	"renderer.dll"\t\t"2"\t	"2"\t	"0"\t	"0987654321fedcba0987654321fedcba09876543"
+	"physics.dll"\t\t"3"\t	"1"\t	"0"\t	"321fedcba0987654321fedcba0987654321fedc"
+	"ui_system.dat"\t"4"\t	"1"\t	"0"\t	"cba0987654321fedcba0987654321fedcba09876"
+	"localization/en.txt"\t"5"\t	"1"\t	"0"\t	"654321fedcba0987654321fedcba0987654321fe"
+}
+
+"FileChunks"
+{
+	"1"\t	"fedcba0987654321fedcba0987654321fedcba09"
+	"2"\t	"0987654321fedcba0987654321fedcba09876543"
+	"3"\t	"321fedcba0987654321fedcba0987654321fedc"
+	"4"\t	"cba0987654321fedcba0987654321fedcba09876"
+	"5"\t	"654321fedcba0987654321fedcba0987654321fe"
+}
+
+"ChunkData"
+{
+	"fedcba0987654321fedcba0987654321fedcba09"\t	"2097152"\t	"fedcba0987654321fedcba0987654321fedcba0987654321"
+	"0987654321fedcba0987654321fedcba09876543"\t	"1048576"\t	"0987654321fedcba0987654321fedcba0987654321fedc"
+	"321fedcba0987654321fedcba0987654321fedc"\t	"524288"\t	"321fedcba0987654321fedcba0987654321fedcba0987"
+	"cba0987654321fedcba0987654321fedcba09876"\t	"262144"\t	"cba0987654321fedcba0987654321fedcba0987654321f"
+	"654321fedcba0987654321fedcba0987654321fe"\t	"131072"\t	"654321fedcba0987654321fedcba0987654321fedcba09"
 }
 `;
 }
