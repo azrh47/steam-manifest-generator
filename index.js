@@ -1,7 +1,11 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { Client, Collection, Events, GatewayIntentBits, ActivityType } = require('discord.js');
-require('dotenv').config();
+
+// Only load .env for local development, Railway provides env vars directly
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
 
 // Create a new client instance
 const client = new Client({
@@ -116,6 +120,10 @@ process.on('SIGTERM', () => {
 });
 
 // Debug checks before login
+console.log("All env vars starting with DISCORD:");
+Object.keys(process.env).filter(key => key.startsWith('DISCORD')).forEach(key => {
+  console.log(`${key}: ${process.env[key] ? 'EXISTS' : 'MISSING'}`);
+});
 console.log("Token exists:", !!process.env.DISCORD_TOKEN);
 console.log("Token length:", process.env.DISCORD_TOKEN?.length);
 
