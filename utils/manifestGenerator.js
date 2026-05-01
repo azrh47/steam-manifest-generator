@@ -11,13 +11,11 @@ function generateSteamManifest(appData) {
   const buildId = generateBuildId();
   
   const manifest = {
-    "//": "EDUCATIONAL TEMPLATE ONLY - Not a real Steam manifest",
     "template_info": {
       "purpose": "Educational template for learning Steam manifest structure",
       "app_name": appData.name,
       "app_id": appData.appId,
-      "generated_at": new Date().toISOString(),
-      "warning": "This is a template file, not a working Steam manifest"
+      "generated_at": new Date().toISOString()
     },
     "appid": appData.appId,
     "name": appData.name,
@@ -251,12 +249,6 @@ function generateDepotTemplate(depotId, appData) {
 "ChunkData"
 {
 }
-
-// EDUCATIONAL TEMPLATE ONLY - Not a real Steam depot manifest
-// This template shows the structure of Steam depot manifests for educational purposes
-// Generated for: ${appData.name} (${appData.appId})
-// Depot ID: ${depotId}
-// Purpose: Learning and development template
 `;
 }
 
@@ -295,11 +287,6 @@ function generateAppManifestTemplate(appData) {
 	{
 	}
 }
-
-// EDUCATIONAL TEMPLATE ONLY - Not a real Steam app manifest
-// This template shows the structure of Steam app manifests for educational purposes
-// Generated for: ${appData.name} (${appData.appId})
-// Purpose: Learning and development template
 `;
 }
 
