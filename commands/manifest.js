@@ -1,6 +1,6 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { getSteamAppDetails, validateAppId } = require('../utils/steamAPI');
-const { generateSteamManifest, formatManifest } = require('../utils/manifestGenerator');
+const { generateSteamManifest, formatManifest, generateDepotTemplate, generateAppManifestTemplate } = require('../utils/manifestGenerator');
 const { generateLuaScript } = require('../utils/luaGenerator');
 const archiver = require('archiver');
 const { Buffer } = require('buffer');
@@ -8,7 +8,7 @@ const { Buffer } = require('buffer');
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('manifest')
-    .setDescription('Generate a Steam app manifest and Lua script for a Steam app')
+    .setDescription('Generate educational Steam manifest templates and Lua script')
     .addIntegerOption(option =>
       option
         .setName('appid')
@@ -45,10 +45,13 @@ module.exports = {
       console.log(`Fetching Steam app details for App ID: ${appId}`);
       const appData = await getSteamAppDetails(appId);
 
-      // Generate files locally
+      // Generate educational template files
       const manifest = generateSteamManifest(appData);
       const manifestJson = formatManifest(manifest);
       const luaScript = generateLuaScript(appData);
+      const appManifestTemplate = generateAppManifestTemplate(appData);
+      const depot1Template = generateDepotTemplate(228980, appData);
+      const depot2Template = generateDepotTemplate(228981, appData);
 
       // Create ZIP file
       const zip = archiver('zip', { zlib: { level: 9 } });
@@ -56,8 +59,11 @@ module.exports = {
 
       zip.on('data', (chunk) => zipBuffer.push(chunk));
       
-      zip.append(manifestJson, { name: `${appData.appId}_manifest.json` });
-      zip.append(luaScript, { name: `${appData.appId}_script.lua` });
+      // Add educational template files
+      zip.append(appManifestTemplate, { name: `appmanifest_${appData.appId}_template.acf` });
+      zip.append(depot1Template, { name: `depot_1_template.manifest` });
+      zip.append(depot2Template, { name: `depot_2_template.manifest` });
+      zip.append(luaScript, { name: `${appData.appId}_script_template.lua` });
       
       await zip.finalize();
       
@@ -66,17 +72,17 @@ module.exports = {
       // Create main embed
       const mainEmbed = new EmbedBuilder()
         .setColor('#00FF00')
-        .setTitle(`🎮 Files Generated for ${appData.name}`)
+        .setTitle(`🎮 Educational Templates Generated for ${appData.name}`)
         .setURL(`https://store.steampowered.com/app/${appId}`)
-        .setDescription(`Your Steam manifest and Lua script have been generated in a ZIP file!`)
+        .setDescription(`Generated educational templates for development and resource organization.`)
         .setThumbnail(appData.headerImage || null)
         .addFields(
           { name: '📋 App Information', value: `**App ID:** ${appId}\n**Developer:** ${appData.developer}\n**Publisher:** ${appData.publisher}\n**Release Date:** ${appData.releaseDate}\n**Genres:** ${appData.genres.join(', ') || 'N/A'}`, inline: false },
-          { name: '📁 Generated Files', value: `✅ **${appData.appId}_manifest.json** - Steam manifest file\n✅ **${appData.appId}_script.lua** - Lua script file\n\nBoth files are Steamtools compatible and ready to use!`, inline: false }
+          { name: '📁 Generated Templates', value: `✅ **appmanifest_${appId}_template.acf** - App manifest template\n✅ **depot_1_template.manifest** - Depot manifest template\n✅ **depot_2_template.manifest** - Second depot template\n✅ **${appId}_script_template.lua** - Lua script template\n\nAll files are clearly labeled as educational templates.`, inline: false }
         )
         .setTimestamp()
         .setFooter({
-          text: 'Steam Manifest Generator Bot • ZIP file attached',
+          text: 'Nerai Templates • Educational templates attached',
           iconURL: interaction.client.user.displayAvatarURL()
         });
 

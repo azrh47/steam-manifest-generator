@@ -1,9 +1,9 @@
 const { generateManifestId, generateBuildId } = require('./steamAPI');
 
 /**
- * Generates a Steam app manifest based on app data
+ * Generates educational Steam app manifest template based on app data
  * @param {Object} appData - Steam app data from the API
- * @returns {Object} - Steam manifest object
+ * @returns {Object} - Educational template manifest object
  */
 function generateSteamManifest(appData) {
   const currentTime = Math.floor(Date.now() / 1000);
@@ -11,11 +11,19 @@ function generateSteamManifest(appData) {
   const buildId = generateBuildId();
   
   const manifest = {
+    "//": "EDUCATIONAL TEMPLATE ONLY - Not a real Steam manifest",
+    "template_info": {
+      "purpose": "Educational template for learning Steam manifest structure",
+      "app_name": appData.name,
+      "app_id": appData.appId,
+      "generated_at": new Date().toISOString(),
+      "warning": "This is a template file, not a working Steam manifest"
+    },
     "appid": appData.appId,
     "name": appData.name,
     "state": "eStateAvailable",
     "installdir": appData.name.toLowerCase().replace(/[^a-z0-9]/g, '_'),
-    "size": Math.floor(Math.random() * 50000000000) + 1000000000, // Random size between 1GB and 50GB
+    "size": 1000000000, // Template size
     "bytes_downloaded": 0,
     "bytes_staged": 0,
     "bytes_to_download": 0,
@@ -29,10 +37,10 @@ function generateSteamManifest(appData) {
     },
     "manifest": {
       "gid": manifestId,
-      "size": Math.floor(Math.random() * 100000000) + 1000000, // Random manifest size
-      "download_size": Math.floor(Math.random() * 50000000000) + 1000000000,
+      "size": 1000000, // Template manifest size
+      "download_size": 1000000000,
       "time_updated": currentTime,
-      "time_created": currentTime - 86400, // 1 day ago
+      "time_created": currentTime - 86400,
       "encrypted_gid": manifestId.toString(16),
       "decrypt_key": "",
       "filenames": [
@@ -194,8 +202,111 @@ function formatBytes(bytes) {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
+/**
+ * Generates educational depot manifest template
+ * @param {number} depotId - Depot ID
+ * @param {Object} appData - Steam app data
+ * @returns {string} - Depot manifest template content
+ */
+function generateDepotTemplate(depotId, appData) {
+  const currentTime = Math.floor(Date.now() / 1000);
+  
+  return `"DepotBuildID"
+{
+	"m_nBuildID"\t\t"1234567890"
+	"m_ulTimeUpdated"\t"${currentTime}"
+}
+
+"Manifest"
+{
+	"m_nManifestID"\t"${Math.random().toString(36).substring(2, 15)}"
+	"m_nFileCount"\t"100"
+	"m_nTotalSizeUncompressed"\t"1000000000"
+	"m_nTotalSizeCompressed"\t"800000000"
+	"m_nEncryptedSize"\t"0"
+	"m_bFileDataHashIncluded"\t"1"
+	"m_nAppID"\t"${appData.appId}"
+	"m_nDepotID"\t"${depotId}"
+	"m_nLastContentManifest"\t"0"
+	"m_nChunkManifest"\t"0"
+	"m_nDownloadSizeManifest"\t"0"
+	"m_nSignatureSize"\t"256"
+	"m_bRequiresDownloadSubdirectory"\t"0"
+	"m_bUserSpecific"\t"0"
+	"m_bLegacyMapping"\t"0"
+	"m_nFileMappingInfoSize"\t"0"
+	"m_nFileMappingInfoCompressedSize"\t"0"
+	"m_bAppManifest"\t"0"
+	"m_bPatchFile"\t"0"
+}
+
+"FileMapping"
+{
+}
+
+"FileChunks"
+{
+}
+
+"ChunkData"
+{
+}
+
+// EDUCATIONAL TEMPLATE ONLY - Not a real Steam depot manifest
+// This template shows the structure of Steam depot manifests for educational purposes
+// Generated for: ${appData.name} (${appData.appId})
+// Depot ID: ${depotId}
+// Purpose: Learning and development template
+`;
+}
+
+/**
+ * Generates app manifest ACF template
+ * @param {Object} appData - Steam app data
+ * @returns {string} - ACF template content
+ */
+function generateAppManifestTemplate(appData) {
+  const currentTime = Math.floor(Date.now() / 1000);
+  
+  return `"AppState"
+{
+	"appid"\t\t"${appData.appId}"
+	"universe"\t"1"
+	"name"\t\t"${appData.name}"
+	"StateFlags"\t"4"
+	"installdir"\t\t"${appData.name.toLowerCase().replace(/[^a-z0-9]/g, '_')}"
+	"SizeOnDisk"\t\t"1000000000"
+	"StagingSize"\t\t"0"
+	"buildid"\t\t"1234567890"
+	"LastUpdated"\t"${currentTime}"
+	"UpdateResult"\t"0"
+	"TargetBuildID"\t"1234567890"
+	"AutoUpdateBehavior"\t"0"
+	"AllowOtherDownloadsWhileRunning"\t"0"
+	"UserConfig"
+	{
+	}
+	"MountedDepots"
+	{
+		"228980"\t\t"1234567890123456789"
+		"228981"\t\t"1234567890123456790"
+	}
+	"InstallScripts"
+	{
+	}
+}
+
+// EDUCATIONAL TEMPLATE ONLY - Not a real Steam app manifest
+// This template shows the structure of Steam app manifests for educational purposes
+// Generated for: ${appData.name} (${appData.appId})
+// Purpose: Learning and development template
+`;
+}
+
 module.exports = {
   generateSteamManifest,
   formatManifest,
-  getManifestSummary
+  getManifestSummary,
+  generateDepotTemplate,
+  generateAppManifestTemplate
 };
