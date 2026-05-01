@@ -12,9 +12,9 @@ export async function POST(request: NextRequest) {
     console.log(`📝 Processing request for App ID: ${appId}, User: ${discordUsername}`);
 
     // Import utility functions
-    const { getSteamAppDetails, validateAppId } = await import('../../../../../utils/steamAPI');
-    const { generateSteamManifest, formatManifest } = await import('../../../../../utils/manifestGenerator');
-    const { generateLuaScript } = await import('../../../../../utils/luaGenerator');
+    const { getSteamAppDetails, validateAppId } = await import('../../../../../utils/steamAPI.js');
+    const { generateSteamManifest, formatManifest } = await import('../../../../../utils/manifestGenerator.js');
+    const { generateLuaScript } = await import('../../../../../utils/luaGenerator.js');
 
     // Validate input
     if (!validateAppId(appId)) {
