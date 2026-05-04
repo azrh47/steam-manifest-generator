@@ -3,6 +3,7 @@ require('dotenv').config();
 
 const commands = [
   require('../commands/manifest').data.toJSON(),
+  require('../commands/version').data.toJSON(),
 ];
 
 // Construct and prepare an instance of the REST module
