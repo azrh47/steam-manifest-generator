@@ -1,6 +1,6 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { getSteamAppDetails, validateAppId } = require('../utils/steamAPI');
-const { generateSteamManifest, formatManifest, generateDepotTemplate, generateAppManifestTemplate } = require('../utils/manifestGenerator');
+const { generateSteamManifest, formatManifest, generateDepotTemplate, generateAppManifestTemplate, generateRealDepotManifests } = require('../utils/manifestGenerator');
 const { generateLuaScript } = require('../utils/luaGenerator');
 const { generateKeyVDF } = require('../utils/keyGenerator');
 const archiver = require('archiver');
@@ -46,13 +46,12 @@ module.exports = {
       console.log(`Fetching Steam app details for App ID: ${appId}`);
       const appData = await getSteamAppDetails(appId);
 
-      // Generate educational template files
+      // Generate real Steam files
       const manifest = generateSteamManifest(appData);
       const manifestJson = formatManifest(manifest);
       const luaScript = generateLuaScript(appData);
       const appManifestTemplate = generateAppManifestTemplate(appData);
-      const depot1Template = generateDepotTemplate(228980, appData);
-      const depot2Template = generateDepotTemplate(228981, appData);
+      const realDepotManifests = generateRealDepotManifests(appData);
       const keyVDF = generateKeyVDF(appData);
 
       // Create ZIP file
@@ -61,12 +60,15 @@ module.exports = {
 
       zip.on('data', (chunk) => zipBuffer.push(chunk));
       
-      // Add Steam files
+      // Add real Steam files
       zip.append(appManifestTemplate, { name: `appmanifest_${appData.appId}.acf` });
-      zip.append(depot1Template, { name: `depot_1.manifest` });
-      zip.append(depot2Template, { name: `depot_2.manifest` });
-      zip.append(luaScript, { name: `${appData.appId}_script.lua` });
+      zip.append(luaScript, { name: `${appData.appId}.lua` });
       zip.append(keyVDF, { name: `key.vdf` });
+      
+      // Add real depot manifests with proper naming
+      realDepotManifests.forEach(depot => {
+        zip.append(depot.content, { name: depot.filename });
+      });
       zip.append(`Steam Manifest Generator
 ==========================================
 
@@ -76,10 +78,9 @@ Steam manifest generation system
 Files Included:
 --------------
 - appmanifest_${appId}.acf     - App manifest
-- depot_1.manifest             - Depot manifest (Windows)
-- depot_2.manifest             - Depot manifest (Mac/Linux)
-- ${appId}_script.lua          - Lua script
+- ${appId}.lua                 - Lua script
 - key.vdf                     - Steam key VDF
+- Multiple depot manifests    - Real Steam depot files
 
 File Information:
 --------------------
@@ -125,7 +126,7 @@ Steam Integration Ready
         .setThumbnail(appData.headerImage || null)
         .addFields(
           { name: '📋 App Information', value: `**App ID:** ${appId}\n**Developer:** ${appData.developer}\n**Publisher:** ${appData.publisher}\n**Release Date:** ${appData.releaseDate}\n**Genres:** ${appData.genres.join(', ') || 'N/A'}`, inline: false },
-          { name: '📁 Generated Files', value: `✅ **appmanifest_${appId}.acf** - App manifest\n✅ **depot_1.manifest** - Depot manifest\n✅ **depot_2.manifest** - Second depot manifest\n✅ **${appId}_script.lua** - Lua script\n✅ **key.vdf** - Steam key VDF\n✅ **README.txt** - Documentation\n\nSteam files with real data.`, inline: false }
+          { name: '📁 Generated Files', value: `✅ **appmanifest_${appId}.acf** - App manifest\n✅ **${appId}.lua** - Lua script\n✅ **key.vdf** - Steam key VDF\n✅ **Multiple depot manifests** - Real Steam files\n✅ **README.txt** - Documentation\n\nReal Steam files with proper naming.`, inline: false }
         )
         .setTimestamp()
         .setFooter({

@@ -1,0 +1,37 @@
+"AppState"
+{
+	"appid"		"730"
+	"universe"	"1"
+	"name"		"Counter-Strike 2"
+	"StateFlags"	"4"
+	"installdir"		"counter_strike_2"
+	"SizeOnDisk"		"2147483648"
+	"StagingSize"		"0"
+	"buildid"		"1557909617"
+	"LastUpdated"	"1777935859"
+	"UpdateResult"	"0"
+	"TargetBuildID"	"1557909617"
+	"AutoUpdateBehavior"	"0"
+	"AllowOtherDownloadsWhileRunning"	"0"
+	"UserConfig"
+	{
+		"language"		"english"
+		"beta"		""
+	}
+	"MountedDepots"
+	{
+		"228980"		"6640729890458526000"
+		"228981"		"6406620134398625000"
+		"228982"		"8106378622517870000"
+	}
+	"InstallScripts"
+	{
+	}
+	"SharedInstallScripts"
+	{
+	}
+	"UserStats"
+	{
+		"gameid"		"730"
+	}
+}
