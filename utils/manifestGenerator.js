@@ -208,87 +208,63 @@ function formatBytes(bytes) {
  */
 function generateDepotTemplate(depotId, appData) {
   const currentTime = Math.floor(Date.now() / 1000);
+  const buildId = Math.floor(Math.random() * 9000000000) + 1000000000;
+  const manifestId = Math.floor(Math.random() * 9000000000000000000) + 1000000000000000000;
   
-  // Different content for depot 2 to show variety
-  if (depotId === 228981) {
-    return `"DepotBuildID"
-{
-	"m_nBuildID"\t\t"1234567890"
-	"m_ulTimeUpdated"\t"${currentTime}"
-}
+  // Generate file list based on depot
+  const gameFiles = depotId === 228980 ? [
+    { name: `${appData.name.toLowerCase().replace(/[^a-z0-9]/g, '_')}.exe`, size: "52428800", chunks: "1" },
+    { name: "steam_api.dll", size: "1048576", chunks: "2" },
+    { name: "game_data.bin", size: "1073741824", chunks: "3,4,5" },
+    { name: "resources/textures.dat", size: "268435456", chunks: "6,7" },
+    { name: "audio/sounds.wem", size: "134217728", chunks: "8,9" },
+    { name: "config/settings.ini", size: "4096", chunks: "10" }
+  ] : depotId === 228981 ? [
+    { name: "game.app", size: "52428800", chunks: "1" },
+    { name: "steam_api.dylib", size: "1048576", chunks: "2" },
+    { name: "game_data.bin", size: "1073741824", chunks: "3,4,5" },
+    { name: "resources/textures.dat", size: "268435456", chunks: "6,7" }
+  ] : [
+    { name: "game.x86_64", size: "52428800", chunks: "1" },
+    { name: "steam_api.so", size: "1048576", chunks: "2" },
+    { name: "game_data.bin", size: "1073741824", chunks: "3,4,5" },
+    { name: "resources/textures.dat", size: "268435456", chunks: "6,7" }
+  ];
 
-"Manifest"
-{
-	"m_nManifestID"\t"${Math.random().toString(36).substring(2, 15)}"
-	"m_nFileCount"\t"100"
-	"m_nTotalSizeUncompressed"\t"1000000000"
-	"m_nTotalSizeCompressed"\t"800000000"
-	"m_nEncryptedSize"\t"0"
-	"m_bFileDataHashIncluded"\t"1"
-	"m_nAppID"\t"${appData.appId}"
-	"m_nDepotID"\t"${depotId}"
-	"m_nLastContentManifest"\t"0"
-	"m_nChunkManifest"\t"0"
-	"m_nDownloadSizeManifest"\t"0"
-	"m_nSignatureSize"\t"256"
-	"m_bRequiresDownloadSubdirectory"\t"0"
-	"m_bUserSpecific"\t"0"
-	"m_bLegacyMapping"\t"0"
-	"m_nFileMappingInfoSize"\t"0"
-	"m_nFileMappingInfoCompressedSize"\t"0"
-	"m_bAppManifest"\t"0"
-	"m_bPatchFile"\t"0"
-}
-
-"FileMapping"
-{
-	"game.exe"\t\t"1"\t	"2"\t	"0"\t	"1234567890abcdef1234567890abcdef12345678"
-	"steam_api.dll"\t\t"3"\t	"1"\t	"0"\t	"abcdef1234567890abcdef1234567890abcdef12"
-	"game_data.bin"\t\t"4"\t	"5"\t	"0"\t	"567890abcdef1234567890abcdef1234567890ab"
-	"resources/textures.dat"\t"6"\t	"2"\t	"0"\t	"cdef1234567890abcdef1234567890abcdef1234"
-	"audio/sounds.wem"\t\t"7"\t	"3"\t	"0"\t	"234567890abcdef1234567890abcdef12345678"
-	"config/settings.ini"\t"8"\t	"1"\t	"0"\t	"34567890abcdef1234567890abcdef1234567890"
-}
-
-"FileChunks"
-{
-	"1"\t\t"a1b2c3d4e5f6789012345678901234567890abcd"
-	"2"\t\t"f1e2d3c4b5a6978012345678901234567890efgh"
-	"3"\t\t"9a8b7c6d5e4f321001234567890123456789ijkl"
-	"4"\t\t"1234abcd5678efgh9012ijkl3456mnop7890qrst"
-	"5"\t	"uvwx5678yzab9012cdef3456ghij7890klmn"
-	"6"\t	"opqr1234stuv5678wxyz9012abcd3456efgh"
-	"7"\t	"ijkl5678mnop9012qrst3456uvwx7890yzab"
-	"8"\t	"cdef1234ghij5678klmn9012opqr3456stuv"
-}
-
-"ChunkData"
-{
-	"a1b2c3d4e5f6789012345678901234567890abcd"\t	"1048576"\t	"a1b2c3d4e5f6789012345678901234567890abcd1234567890abcdef"
-	"f1e2d3c4b5a6978012345678901234567890efgh"\t	"524288"\t	"f1e2d3c4b5a6978012345678901234567890efgh1234567890abcdef"
-	"9a8b7c6d5e4f321001234567890123456789ijkl"\t	"2097152"\t	"9a8b7c6d5e4f321001234567890123456789ijkl1234567890abcdef"
-	"1234abcd5678efgh9012ijkl3456mnop7890qrst"\t	"4194304"\t	"1234abcd5678efgh9012ijkl3456mnop7890qrst1234567890abcdef"
-	"uvwx5678yzab9012cdef3456ghij7890klmn"\t	"1048576"\t	"uvwx5678yzab9012cdef3456ghij7890klmn1234567890abcdef"
-	"opqr1234stuv5678wxyz9012abcd3456efgh"\t	"2097152"\t	"opqr1234stuv5678wxyz9012abcd3456efgh1234567890abcdef"
-	"ijkl5678mnop9012qrst3456uvwx7890yzab"\t	"524288"\t	"ijkl5678mnop9012qrst3456uvwx7890yzab1234567890abcdef"
-	"cdef1234ghij5678klmn9012opqr3456stuv"\t	"262144"\t	"cdef1234ghij5678klmn9012opqr3456stuv1234567890abcdef"
-}
-`;
-  }
+  // Generate file mapping
+  let fileMapping = '"FileMapping"\n{\n';
+  let fileChunks = '"FileChunks"\n{\n';
+  let chunkData = '"ChunkData"\n{\n';
   
-  // Default depot template
+  gameFiles.forEach((file, index) => {
+    const fileNum = index + 1;
+    const hash = Array.from({length: 40}, () => Math.floor(Math.random() * 16).toString(16)).join('');
+    fileMapping += `\t"${file.name}"\t\t"${fileNum}"\t\t"${file.chunks}"\t\t"0"\t\t"${hash}"\n`;
+    
+    file.chunks.split(',').forEach(chunk => {
+      const chunkHash = Array.from({length: 40}, () => Math.floor(Math.random() * 16).toString(16)).join('');
+      const chunkSize = Math.floor(Math.random() * 1048576) + 262144; // Random size between 256KB and 1MB
+      fileChunks += `\t\t"${chunk}"\t\t"${chunkHash}"\n`;
+      chunkData += `\t\t"${chunkHash}"\t\t"${chunkSize}"\t\t"${chunkHash}${Array.from({length: 32}, () => Math.floor(Math.random() * 16).toString(16)).join('')}"\n`;
+    });
+  });
+  
+  fileMapping += '}\n\n';
+  fileChunks += '}\n\n';
+  chunkData += '}\n';
+
   return `"DepotBuildID"
 {
-	"m_nBuildID"\t\t"1234567890"
+	"m_nBuildID"\t\t"${buildId}"
 	"m_ulTimeUpdated"\t"${currentTime}"
 }
 
 "Manifest"
 {
-	"m_nManifestID"\t"${Math.random().toString(36).substring(2, 15)}"
-	"m_nFileCount"\t"80"
-	"m_nTotalSizeUncompressed"\t"800000000"
-	"m_nTotalSizeCompressed"\t"600000000"
+	"m_nManifestID"\t"${manifestId}"
+	"m_nFileCount"\t"${gameFiles.length}"
+	"m_nTotalSizeUncompressed"\t"${gameFiles.reduce((sum, file) => sum + parseInt(file.size), 0)}"
+	"m_nTotalSizeCompressed"\t"${Math.floor(gameFiles.reduce((sum, file) => sum + parseInt(file.size), 0) * 0.7)}"
 	"m_nEncryptedSize"\t"0"
 	"m_bFileDataHashIncluded"\t"1"
 	"m_nAppID"\t"${appData.appId}"
@@ -306,33 +282,7 @@ function generateDepotTemplate(depotId, appData) {
 	"m_bPatchFile"\t"0"
 }
 
-"FileMapping"
-{
-	"engine.dll"\t\t"1"\t	"1"\t	"0"\t	"fedcba0987654321fedcba0987654321fedcba09"
-	"renderer.dll"\t\t"2"\t	"2"\t	"0"\t	"0987654321fedcba0987654321fedcba09876543"
-	"physics.dll"\t\t"3"\t	"1"\t	"0"\t	"321fedcba0987654321fedcba0987654321fedc"
-	"ui_system.dat"\t"4"\t	"1"\t	"0"\t	"cba0987654321fedcba0987654321fedcba09876"
-	"localization/en.txt"\t"5"\t	"1"\t	"0"\t	"654321fedcba0987654321fedcba0987654321fe"
-}
-
-"FileChunks"
-{
-	"1"\t	"fedcba0987654321fedcba0987654321fedcba09"
-	"2"\t	"0987654321fedcba0987654321fedcba09876543"
-	"3"\t	"321fedcba0987654321fedcba0987654321fedc"
-	"4"\t	"cba0987654321fedcba0987654321fedcba09876"
-	"5"\t	"654321fedcba0987654321fedcba0987654321fe"
-}
-
-"ChunkData"
-{
-	"fedcba0987654321fedcba0987654321fedcba09"\t	"2097152"\t	"fedcba0987654321fedcba0987654321fedcba0987654321"
-	"0987654321fedcba0987654321fedcba09876543"\t	"1048576"\t	"0987654321fedcba0987654321fedcba0987654321fedc"
-	"321fedcba0987654321fedcba0987654321fedc"\t	"524288"\t	"321fedcba0987654321fedcba0987654321fedcba0987"
-	"cba0987654321fedcba0987654321fedcba09876"\t	"262144"\t	"cba0987654321fedcba0987654321fedcba0987654321f"
-	"654321fedcba0987654321fedcba0987654321fe"\t	"131072"\t	"654321fedcba0987654321fedcba0987654321fedcba09"
-}
-`;
+${fileMapping}${fileChunks}${chunkData}`;
 }
 
 /**
@@ -342,32 +292,43 @@ function generateDepotTemplate(depotId, appData) {
  */
 function generateAppManifestTemplate(appData) {
   const currentTime = Math.floor(Date.now() / 1000);
+  const buildId = Math.floor(Math.random() * 9000000000) + 1000000000;
   
   return `"AppState"
 {
-	"appid"\t\t"${appData.appId}"
-	"universe"\t"1"
-	"name"\t\t"${appData.name}"
-	"StateFlags"\t"4"
-	"installdir"\t\t"${appData.name.toLowerCase().replace(/[^a-z0-9]/g, '_')}"
-	"SizeOnDisk"\t\t"1000000000"
-	"StagingSize"\t\t"0"
-	"buildid"\t\t"1234567890"
-	"LastUpdated"\t"${currentTime}"
-	"UpdateResult"\t"0"
-	"TargetBuildID"\t"1234567890"
-	"AutoUpdateBehavior"\t"0"
-	"AllowOtherDownloadsWhileRunning"\t"0"
+	"appid"		"${appData.appId}"
+	"universe"	"1"
+	"name"		"${appData.name}"
+	"StateFlags"	"4"
+	"installdir"		"${appData.name.toLowerCase().replace(/[^a-z0-9]/g, '_')}"
+	"SizeOnDisk"		"2147483648"
+	"StagingSize"		"0"
+	"buildid"		"${buildId}"
+	"LastUpdated"	"${currentTime}"
+	"UpdateResult"	"0"
+	"TargetBuildID"	"${buildId}"
+	"AutoUpdateBehavior"	"0"
+	"AllowOtherDownloadsWhileRunning"	"0"
 	"UserConfig"
 	{
+		"language"		"english"
+		"beta"		""
 	}
 	"MountedDepots"
 	{
-		"228980"\t\t"1234567890123456789"
-		"228981"\t\t"1234567890123456790"
+		"228980"		"${Math.floor(Math.random() * 9000000000000000000) + 1000000000000000000}"
+		"228981"		"${Math.floor(Math.random() * 9000000000000000000) + 1000000000000000000}"
+		"228982"		"${Math.floor(Math.random() * 9000000000000000000) + 1000000000000000000}"
 	}
 	"InstallScripts"
 	{
+	}
+	"SharedInstallScripts"
+	{
+	}
+	"UserStats"
+	{
+		"gameid"		"${appData.appId}"
 	}
 }
 `;
