@@ -295,10 +295,49 @@ async function getWebApiData(appId) {
   }
 }
 
+/**
+ * Searches for games on Steam using the Store API
+ * @param {string} query - Search query
+ * @param {number} limit - Number of results to return
+ * @returns {Promise<Array>} - Array of search results
+ */
+async function searchSteamGames(query, limit = 5) {
+  try {
+    const response = await axios.get(
+      `https://store.steampowered.com/api/storesearch/?term=${encodeURIComponent(query)}&l=english&cc=US`
+    );
+    
+    const data = response.data;
+    
+    if (!data.items || data.items.length === 0) {
+      return [];
+    }
+    
+    // Process and limit results
+    const results = data.items
+      .slice(0, limit)
+      .map(item => ({
+        appid: item.id,
+        name: item.name,
+        release_date: item.release_date ? item.release_date.split(',')[0] : null,
+        platforms: item.platforms || { windows: false, mac: false, linux: false },
+        price: item.price ? `$${(item.price / 100).toFixed(2)}` : 'Free',
+        header_image: item.tiny_image || null
+      }));
+    
+    return results;
+    
+  } catch (error) {
+    console.error(`Error searching Steam for query "${query}":`, error);
+    return [];
+  }
+}
+
 module.exports = {
   getSteamAppDetails,
   validateAppId,
   generateManifestId,
   generateBuildId,
-  getWebApiData
+  getWebApiData,
+  searchSteamGames
 };
