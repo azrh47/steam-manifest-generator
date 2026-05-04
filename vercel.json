@@ -6,6 +6,10 @@
   "framework": null,
   "builds": [
     {
+      "src": "app/page.jsx",
+      "use": "@vercel/static"
+    },
+    {
       "src": "api/index.js",
       "use": "@vercel/node"
     }
@@ -17,7 +21,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "/api/index.js"
+      "dest": "/app/page.jsx"
     }
   ]
 }
