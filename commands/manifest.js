@@ -72,13 +72,13 @@ module.exports = {
       // Create main embed
       const mainEmbed = new EmbedBuilder()
         .setColor('#00FF00')
-        .setTitle(`🎮 Educational Templates Generated for ${appData.name}`)
+        .setTitle(`✅ Download completed: ${appData.name}`)
         .setURL(`https://store.steampowered.com/app/${appId}`)
-        .setDescription(`Generated educational templates for development and resource organization.`)
+        .setDescription(`Generated educational templates using real Steam data.`)
         .setThumbnail(appData.headerImage || null)
         .addFields(
           { name: '📋 App Information', value: `**App ID:** ${appId}\n**Developer:** ${appData.developer}\n**Publisher:** ${appData.publisher}\n**Release Date:** ${appData.releaseDate}\n**Genres:** ${appData.genres.join(', ') || 'N/A'}`, inline: false },
-          { name: '📁 Generated Templates', value: `✅ **appmanifest_${appId}_template.acf** - App manifest template\n✅ **depot_1_template.manifest** - Depot manifest template\n✅ **depot_2_template.manifest** - Second depot template\n✅ **${appId}_script_template.lua** - Lua script template\n\nAll files are clearly labeled as educational templates.`, inline: false }
+          { name: '📁 Generated Templates', value: `✅ **appmanifest_${appId}.acf** - App manifest template\n✅ **depot_1_template.manifest** - Depot manifest template\n✅ **depot_2_template.manifest** - Second depot template\n✅ **${appId}_script_template.lua** - Lua script template\n\nEducational templates with real Steam data.`, inline: false }
         )
         .setTimestamp()
         .setFooter({

@@ -1,13 +1,13 @@
-# Steam Manifest Generator Bot
+# Nerai Templates - Steam Manifest Generator Bot
 
-A Discord bot that generates Steam app manifests and Lua scripts with real Steam API data. Compatible with Steamtools.
+A Discord bot that generates educational Steam manifest templates and Lua scripts with real Steam API data.
 
 ## Features
 
-- `/manifest appid:<id>` - Generate a Steam manifest and Lua script for any Steam app
-- Fetches real data from the Steam Store API
-- Sends files as Discord attachments (no website needed)
-- Steamtools compatible output
+- `/manifest appid:<id>` - Generate educational templates for any Steam app
+- Fetches real data from Steam Web API and Store API
+- Sends templates as ZIP file attachments
+- Educational templates only (not working Steam files)
 
 ## Setup
 
@@ -19,12 +19,13 @@ npm install
 
 ### 2. Create a `.env` file
 
-Copy `.env.example` and fill in your bot token:
+Copy `.env.example` and fill in your environment variables:
 
 ```env
 DISCORD_TOKEN=your_bot_token_here
 CLIENT_ID=1498423752160182552
 GUILD_ID=1407119291559579759
+STEAM_API_KEY=your_steam_api_key_here
 ```
 
 ### 3. Deploy slash commands
@@ -41,35 +42,49 @@ npm run deploy
 npm start
 ```
 
-## Deploy to Railway (24/7 Hosting)
-
-1. Push your code to GitHub
-2. Go to [railway.app](https://railway.app) and sign up
-3. Click **New Project** → **Deploy from GitHub repo**
-4. Select your repository
-5. Add environment variables in the **Variables** tab:
-   - `DISCORD_TOKEN` = your bot token
-   - `CLIENT_ID` = `1498423752160182552`
-   - `GUILD_ID` = `1407119291559579759`
-6. Railway auto-detects Node.js and runs:
-   - **Build:** `npm install`
-   - **Start:** `npm start`
-7. Your bot goes online automatically!
-
-## Deploy to Render (Alternative)
+## Deploy to Render (24/7 Hosting)
 
 1. Push your code to GitHub
 2. Go to [render.com](https://render.com) and sign up
 3. Click **New** → **Background Worker**
-4. Connect your GitHub repo
-5. Set:
-   - **Build Command:** `npm install`
-   - **Start Command:** `npm start`
+4. Connect your GitHub repository
+5. Set configuration:
+   - **Build Command**: `npm install`
+   - **Start Command**: `npm start`
 6. Add environment variables:
    - `DISCORD_TOKEN` = your bot token
    - `CLIENT_ID` = `1498423752160182552`
    - `GUILD_ID` = `1407119291559579759`
+   - `STEAM_API_KEY` = your Steam Web API key
+   - `NODE_VERSION` = `20`
 7. Click **Create** and your bot starts!
+
+## Environment Variables
+
+### Required
+```env
+DISCORD_TOKEN=your_discord_bot_token
+CLIENT_ID=1498423752160182552
+GUILD_ID=1407119291559579759
+STEAM_API_KEY=your_steam_web_api_key
+NODE_VERSION=20
+```
+
+### Getting a Steam Web API Key
+1. Go to [Steam Community](https://steamcommunity.com/dev/apikey)
+2. Log in with your Steam account
+3. Enter any domain name (e.g., `localhost`)
+4. Copy your API key
+
+## Generated Templates
+
+The bot generates a ZIP file containing:
+- `appmanifest_{appid}.acf` - App manifest template
+- `depot_1_template.manifest` - Depot manifest template
+- `depot_2_template.manifest` - Second depot template
+- `{appid}_script_template.lua` - Lua script template
+
+All templates use real Steam data but are clearly marked as educational examples.
 
 ## Project Structure
 

@@ -21,7 +21,7 @@ function generateSteamManifest(appData) {
     "name": appData.name,
     "state": "eStateAvailable",
     "installdir": appData.name.toLowerCase().replace(/[^a-z0-9]/g, '_'),
-    "size": 1000000000, // Template size
+    "size": appData.estimatedSize || 1000000000, // Use real size if available
     "bytes_downloaded": 0,
     "bytes_staged": 0,
     "bytes_to_download": 0,
