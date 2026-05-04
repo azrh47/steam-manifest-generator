@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSteamAppDetails, validateAppId } from '../../../../../utils/steamAPI.js';
 import { generateSteamManifest, formatManifest } from '../../../../../utils/manifestGenerator.js';
 import { generateLuaScript } from '../../../../../utils/luaGenerator.js';
+import { generateSteamKeys, generateKeyVDF } from '../../../../../utils/keyGenerator.js';
 import { randomBytes } from 'crypto';
 
 // Fallback in-memory storage for when Supabase is not available
@@ -37,7 +38,9 @@ export async function POST(request: NextRequest) {
     const manifest = generateSteamManifest(appData);
     const manifestJson = formatManifest(manifest);
     const luaScript = generateLuaScript(appData);
-    console.log('📁 Generated manifest and Lua script');
+    const keyData = generateSteamKeys(appData);
+    const keyVDF = generateKeyVDF(appData);
+    console.log('📁 Generated manifest, Lua script, and key VDF');
 
     // Generate unique access key
     const accessKey = randomBytes(16).toString('hex');
@@ -56,8 +59,11 @@ export async function POST(request: NextRequest) {
       steamAppName: appData.name,
       manifestContent: manifestJson,
       luaContent: luaScript,
+      keyVDFContent: keyVDF,
+      keyData: keyData,
       manifestSize: manifestJson.length,
       luaSize: luaScript.length,
+      keyVDFSize: keyVDF.length,
       expiresAt: expiresAt,
       createdAt: new Date()
     };
@@ -80,8 +86,11 @@ export async function POST(request: NextRequest) {
           steamAppName: appData.name,
           manifestContent: manifestJson,
           luaContent: luaScript,
+          keyVDFContent: keyVDF,
+          keyData: keyData,
           manifestSize: manifestJson.length,
           luaSize: luaScript.length,
+          keyVDFSize: keyVDF.length,
           expiresAt: expiresAt
         });
         
@@ -97,6 +106,7 @@ export async function POST(request: NextRequest) {
     // Create Steamtools-compatible files
     const steamtoolsManifest = createSteamtoolsManifest(manifest, appData);
     const steamtoolsLua = createSteamtoolsLua(luaScript, appData);
+    const steamtoolsKey = createSteamtoolsKey(keyData, keyVDF, appData);
 
     console.log(`🎉 Successfully generated files for ${appData.name}`);
 
@@ -110,7 +120,8 @@ export async function POST(request: NextRequest) {
       message: storedSuccessfully ? 'Files stored in database' : 'Files stored in memory (temporary)',
       steamtoolsFiles: {
         manifest: steamtoolsManifest,
-        lua: steamtoolsLua
+        lua: steamtoolsLua,
+        key: steamtoolsKey
       }
     });
 
@@ -167,6 +178,25 @@ function createSteamtoolsLua(luaScript: string, appData: any) {
       compatible_with: "Steamtools v1.0+",
       language: "lua",
       encoding: "utf-8"
+    }
+  };
+}
+
+function createSteamtoolsKey(keyData: any, keyVDF: string, appData: any) {
+  return {
+    format: "steamtools",
+    version: "1.0",
+    appid: appData.appId,
+    name: appData.name,
+    vdf_content: keyVDF,
+    key_data: keyData,
+    metadata: {
+      generated_by: "Steam Manifest Generator Bot",
+      generated_at: new Date().toISOString(),
+      compatible_with: "Steamtools v1.0+",
+      format: "vdf",
+      encoding: "utf-8",
+      key_count: keyData.keys.length
     }
   };
 }
