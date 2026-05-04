@@ -320,9 +320,21 @@ function generateRealManifestContent(depotId, appData, manifestId, buildId, plat
     
     file.chunks.split(',').forEach(chunk => {
       const chunkHash = Array.from({length: 40}, () => Math.floor(Math.random() * 16).toString(16)).join('');
-      const chunkSize = Math.floor(Math.random() * 1048576) + 262144;
+      // Generate much larger chunk sizes to match file sizes
+      const fileSize = parseInt(file.size);
+      const chunkCount = file.chunks.split(',').length;
+      const chunkSize = Math.floor(fileSize / chunkCount);
+      const actualChunkSize = Math.max(chunkSize, 1048576); // Minimum 1MB per chunk
+      
       fileChunks += `\t\t"${chunk}"\t\t"${chunkHash}"\n`;
-      chunkData += `\t\t"${chunkHash}"\t\t"${chunkSize}"\t\t"${chunkHash}${Array.from({length: 32}, () => Math.floor(Math.random() * 16).toString(16)).join('')}"\n`;
+      
+      // Generate realistic chunk data with actual size
+      const chunkDataSize = Math.min(actualChunkSize, 10485760); // Cap at 10MB per chunk for performance
+      const chunkDataContent = Array.from({length: Math.min(chunkDataSize, 1000)}, () => 
+        Array.from({length: 64}, () => Math.floor(Math.random() * 16).toString(16)).join('')
+      ).join('');
+      
+      chunkData += `\t\t"${chunkHash}"\t\t"${actualChunkSize}"\t\t"${chunkDataContent}"\n`;
     });
   });
   
@@ -363,7 +375,7 @@ ${fileMapping}${fileChunks}${chunkData}`;
 }
 
 /**
- * Generates realistic file list for a platform
+ * Generates realistic file list for a platform with much larger sizes
  * @param {Object} appData - Steam app data
  * @param {string} platform - Platform type
  * @returns {Array} - Array of file objects
@@ -373,36 +385,55 @@ function generateRealisticFileList(appData, platform) {
   
   if (platform === 'windows') {
     return [
-      { name: `${gameName}.exe`, size: "52428800", chunks: "1,2,3,4,5" },
-      { name: "steam_api.dll", size: "1048576", chunks: "6" },
-      { name: "steam_api64.dll", size: "2097152", chunks: "7" },
-      { name: "game_data.bin", size: "1073741824", chunks: "8,9,10,11,12,13,14,15" },
-      { name: "resources/textures.dat", size: "268435456", chunks: "16,17,18,19" },
-      { name: "audio/sounds.wem", size: "134217728", chunks: "20,21,22" },
-      { name: "config/settings.ini", size: "4096", chunks: "23" },
-      { name: "binaries/launcher.exe", size: "1048576", chunks: "24" }
+      { name: `${gameName}.exe`, size: "104857600", chunks: Array.from({length: 50}, (_, i) => i + 1).join(',') },
+      { name: "steam_api.dll", size: "2097152", chunks: Array.from({length: 3}, (_, i) => 51 + i).join(',') },
+      { name: "steam_api64.dll", size: "4194304", chunks: Array.from({length: 5}, (_, i) => 54 + i).join(',') },
+      { name: "game_data.bin", size: "2147483648", chunks: Array.from({length: 200}, (_, i) => 59 + i).join(',') },
+      { name: "resources/textures.dat", size: "1073741824", chunks: Array.from({length: 100}, (_, i) => 259 + i).join(',') },
+      { name: "resources/models.bin", size: "536870912", chunks: Array.from({length: 50}, (_, i) => 359 + i).join(',') },
+      { name: "audio/sounds.wem", size: "268435456", chunks: Array.from({length: 25}, (_, i) => 409 + i).join(',') },
+      { name: "audio/music.wem", size: "134217728", chunks: Array.from({length: 15}, (_, i) => 434 + i).join(',') },
+      { name: "config/settings.ini", size: "8192", chunks: "450" },
+      { name: "binaries/launcher.exe", size: "2097152", chunks: Array.from({length: 3}, (_, i) => 451 + i).join(',') },
+      { name: "binaries/unityplayer.dll", size: "16777216", chunks: Array.from({length: 20}, (_, i) => 454 + i).join(',') },
+      { name: "data/levels/main.unity", size: "104857600", chunks: Array.from({length: 30}, (_, i) => 474 + i).join(',') },
+      { name: "data/shaders/bundle", size: "52428800", chunks: Array.from({length: 15}, (_, i) => 504 + i).join(',') },
+      { name: "localization/en.json", size: "1048576", chunks: "520" },
+      { name: "plugins/bepinex.dll", size: "1048576", chunks: "521" }
     ];
   } else if (platform === 'mac') {
     return [
-      { name: `${gameName}.app`, size: "52428800", chunks: "1,2,3,4,5" },
-      { name: "steam_api.dylib", size: "1048576", chunks: "6" },
-      { name: "game_data.bin", size: "1073741824", chunks: "7,8,9,10,11,12,13,14" },
-      { name: "resources/textures.dat", size: "268435456", chunks: "15,16,17,18" },
-      { name: "audio/sounds.wem", size: "134217728", chunks: "19,20,21" }
+      { name: `${gameName}.app`, size: "104857600", chunks: Array.from({length: 50}, (_, i) => i + 1).join(',') },
+      { name: "steam_api.dylib", size: "2097152", chunks: Array.from({length: 3}, (_, i) => 51 + i).join(',') },
+      { name: "game_data.bin", size: "2147483648", chunks: Array.from({length: 200}, (_, i) => 54 + i).join(',') },
+      { name: "resources/textures.dat", size: "1073741824", chunks: Array.from({length: 100}, (_, i) => 254 + i).join(',') },
+      { name: "resources/models.bin", size: "536870912", chunks: Array.from({length: 50}, (_, i) => 354 + i).join(',') },
+      { name: "audio/sounds.wem", size: "268435456", chunks: Array.from({length: 25}, (_, i) => 404 + i).join(',') },
+      { name: "audio/music.wem", size: "134217728", chunks: Array.from({length: 15}, (_, i) => 429 + i).join(',') },
+      { name: "config/settings.plist", size: "8192", chunks: "444" },
+      { name: "Frameworks/UnityFramework.framework", size: "33554432", chunks: Array.from({length: 40}, (_, i) => 445 + i).join(',') }
     ];
   } else if (platform === 'linux') {
     return [
-      { name: `${gameName}.x86_64`, size: "52428800", chunks: "1,2,3,4,5" },
-      { name: "steam_api.so", size: "1048576", chunks: "6" },
-      { name: "game_data.bin", size: "1073741824", chunks: "7,8,9,10,11,12,13,14" },
-      { name: "resources/textures.dat", size: "268435456", chunks: "15,16,17,18" }
+      { name: `${gameName}.x86_64`, size: "104857600", chunks: Array.from({length: 50}, (_, i) => i + 1).join(',') },
+      { name: "steam_api.so", size: "2097152", chunks: Array.from({length: 3}, (_, i) => 51 + i).join(',') },
+      { name: "game_data.bin", size: "2147483648", chunks: Array.from({length: 200}, (_, i) => 54 + i).join(',') },
+      { name: "resources/textures.dat", size: "1073741824", chunks: Array.from({length: 100}, (_, i) => 254 + i).join(',') },
+      { name: "resources/models.bin", size: "536870912", chunks: Array.from({length: 50}, (_, i) => 354 + i).join(',') },
+      { name: "audio/sounds.wem", size: "268435456", chunks: Array.from({length: 25}, (_, i) => 404 + i).join(',') },
+      { name: "audio/music.wem", size: "134217728", chunks: Array.from({length: 15}, (_, i) => 429 + i).join(',') },
+      { name: "config/settings.conf", size: "8192", chunks: "444" },
+      { name: "lib/unityplayer.so", size: "33554432", chunks: Array.from({length: 40}, (_, i) => 445 + i).join(',') }
     ];
   } else {
-    // DLC
+    // DLC - Much larger DLC files
     return [
-      { name: `dlc_content.bin`, size: "536870912", chunks: "1,2,3,4,5" },
-      { name: "dlc_textures.dat", size: "268435456", chunks: "6,7,8" },
-      { name: "dlc_audio.wem", size: "134217728", chunks: "9,10" }
+      { name: `dlc_content.bin`, size: "1073741824", chunks: Array.from({length: 100}, (_, i) => i + 1).join(',') },
+      { name: `dlc_textures.dat`, size: "536870912", chunks: Array.from({length: 50}, (_, i) => 101 + i).join(',') },
+      { name: `dlc_models.bin`, size: "268435456", chunks: Array.from({length: 25}, (_, i) => 151 + i).join(',') },
+      { name: `dlc_audio.wem`, size: "134217728", chunks: Array.from({length: 15}, (_, i) => 176 + i).join(',') },
+      { name: `dlc_music.wem`, size: "67108864", chunks: Array.from({length: 10}, (_, i) => 191 + i).join(',') },
+      { name: `dlc_config.json`, size: "16384", chunks: "201" }
     ];
   }
 }
