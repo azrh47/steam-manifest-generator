@@ -1,24 +1,4 @@
 {
-  "version": 2,
-  "buildCommand": "npm install",
-  "outputDirectory": ".",
-  "installCommand": "npm install",
-  "framework": null,
-  "builds": [
-    {
-      "src": "app/page.jsx",
-      "use": "@vercel/static"
-    }
-  ],
-  "functions": {
-    "api/index.js": {
-      "runtime": "nodejs20.x"
-    }
-  },
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/index.js"
-    }
-  ]
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next"
 }

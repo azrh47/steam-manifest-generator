@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node index.js",
     "deploy": "node config/deploy-commands.js",
-    "vercel-build": "echo \"No build needed - Discord bot only\""
+    "build": "next build",
+    "dev": "next dev"
   },
   "keywords": [
     "discord",
