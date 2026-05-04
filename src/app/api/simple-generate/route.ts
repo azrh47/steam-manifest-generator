@@ -127,11 +127,11 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('❌ Error generating files:', error);
     return NextResponse.json(
-      { error: 'Failed to generate files: ' + error.message },
+      { error: 'Failed to generate files: ' + (error instanceof Error ? error.message : 'Unknown error') },
       { status: 500 }
     );
   }
 }
 
-// Export storage for use in download route
+// Export fileStorage for use in other routes
 export { fileStorage };

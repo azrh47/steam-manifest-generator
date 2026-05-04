@@ -1,20 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-// Import fileStorage from simple-generate route
-let fileStorage: Map<string, any> | null = null;
-
-async function getFileStorage() {
-  if (!fileStorage) {
-    try {
-      const module = await import('../simple-generate/route.js');
-      fileStorage = module.fileStorage;
-    } catch (error) {
-      console.log('⚠️ Could not import file storage:', error.message);
-      fileStorage = new Map();
-    }
-  }
-  return fileStorage;
-}
+import { fileStorage } from '../../../lib/fileStorage';
 
 export async function GET(
   request: NextRequest,
@@ -32,8 +17,7 @@ export async function GET(
       );
     }
 
-    const storage = await getFileStorage();
-    const steamFile = storage?.get(accessKey);
+    const steamFile = fileStorage.get(accessKey);
 
     if (!steamFile) {
       console.log(`❌ File not found for key: ${accessKey}`);
@@ -46,7 +30,7 @@ export async function GET(
     // Check if file has expired
     if (new Date() > new Date(steamFile.expiresAt)) {
       console.log(`⏰ File expired for key: ${accessKey}`);
-      storage?.delete(accessKey);
+      fileStorage.delete(accessKey);
       
       return NextResponse.json(
         { error: 'Download link has expired' },
@@ -76,7 +60,7 @@ export async function GET(
   } catch (error) {
     console.error('❌ Error downloading files:', error);
     return NextResponse.json(
-      { error: 'Failed to download files: ' + error.message },
+      { error: 'Failed to download files: ' + (error instanceof Error ? error.message : 'Unknown error') },
       { status: 500 }
     );
   }

@@ -79,7 +79,7 @@ CREATE POLICY "Allow deletions" ON generated_files
 
   } catch (error) {
     return NextResponse.json({
-      error: error.message,
+      error: error instanceof Error ? error.message : 'Unknown error occurred',
       manualSetup: {
         sqlURL: 'https://xybrjrecphoavhtvcsnn.supabase.co/project/_/sql'
       }

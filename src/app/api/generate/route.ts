@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
         }
       }
     } catch (supabaseError) {
-      console.log('⚠️ Supabase not available, using memory storage:', supabaseError.message);
+      console.log('⚠️ Supabase not available, using memory storage:', supabaseError instanceof Error ? supabaseError.message : 'Unknown error');
     }
 
     // Create Steamtools-compatible files
@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('❌ Error generating files:', error);
     return NextResponse.json(
-      { error: 'Failed to generate files: ' + error.message },
+      { error: 'Failed to generate files: ' + (error instanceof Error ? error.message : 'Unknown error') },
       { status: 500 }
     );
   }
