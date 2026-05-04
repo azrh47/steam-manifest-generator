@@ -1,5 +1,5 @@
 /**
- * Generates educational Steam key templates
+ * Generates Steam keys
  * @param {Object} appData - Steam app data from the API
  * @returns {Object} - Generated key data
  */
@@ -30,8 +30,7 @@ function generateSteamKeys(appData) {
   }
 
   return {
-    template_info: {
-      purpose: "Educational Steam key generation template",
+    key_info: {
       app_name: appData.name,
       app_id: appData.appId,
       generated_at: new Date().toISOString(),
@@ -82,8 +81,8 @@ function generateVDFContent(keys, appData) {
   vdf += `	}
 	"metadata"
 	{
-		"generator"\t\t"Nerai Templates (https://nerai.xyz/)"
-		"purpose"\t\t"Educational template for Steam key generation"
+		"generator"\t\t"Nerai (https://nerai.xyz/)"
+		"purpose"\t\t"Steam key generation"
 		"generated_at"\t\t"${new Date().toISOString()}"
 		"total_keys"\t\t"${keys.length}"
 	}
@@ -122,17 +121,17 @@ function getKeySummary(keyData) {
   const inactiveKeys = keyData.keys.length - activeKeys;
   
   return {
-    appName: keyData.template_info.app_name,
-    appId: keyData.template_info.app_id,
+    appName: keyData.key_info.app_name,
+    appId: keyData.key_info.app_id,
     totalKeys: keyData.keys.length,
     activeKeys: activeKeys,
     inactiveKeys: inactiveKeys,
-    generatedAt: keyData.template_info.generated_at,
+    generatedAt: keyData.key_info.generated_at,
     keyFormat: 'XXXXX-XXXXX-XXXXX',
     features: [
       'Steam Key Generation',
       'VDF Format Support',
-      'Educational Template',
+      'Steam Integration',
       'Multiple Keys',
       'Metadata Tracking'
     ]
