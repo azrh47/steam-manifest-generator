@@ -446,7 +446,7 @@ function hash(x) {
 }
 
 /**
- * Generates realistic file list for a platform using enhanced Steam API data
+ * Generates realistic file list for a platform using enhanced Steam API data (completely deterministic)
  * @param {Object} appData - Enhanced Steam app data
  * @param {string} platform - Platform type
  * @param {number} customSize - Custom size for the depot
@@ -455,13 +455,13 @@ function hash(x) {
 function generateRealisticFileList(appData, platform, customSize) {
   const gameName = appData.name.toLowerCase().replace(/[^a-z0-9]/g, '_');
   
-  // Use enhanced Steam API data to determine file sizes (optimized for speed)
-  const baseSize = customSize || appData.estimatedSize || 10485760; // Default 10MB (much smaller)
-  const exeSize = Math.min(Math.floor(baseSize * 0.05), 1048576); // Max 1MB for main executable
-  const dataSize = Math.min(Math.floor(baseSize * 0.6), 5242880); // Max 5MB for game data
-  const textureSize = Math.min(Math.floor(baseSize * 0.2), 2097152); // Max 2MB for textures
-  const audioSize = Math.min(Math.floor(baseSize * 0.1), 1048576); // Max 1MB for audio
-  const otherSize = Math.min(Math.floor(baseSize * 0.05), 524288); // Max 512KB for other files
+  // Use completely deterministic sizing based only on App ID
+  const baseSize = customSize || (appData.estimatedSize || 10485760); // Use deterministic size
+  const exeSize = 1048576; // Fixed 1MB for main executable
+  const dataSize = baseSize * 0.6; // 60% for game data
+  const textureSize = baseSize * 0.2; // 20% for textures
+  const audioSize = baseSize * 0.1; // 10% for audio
+  const otherSize = baseSize * 0.05; // 5% for other files
   
   if (platform === 'windows') {
     return [
@@ -492,7 +492,7 @@ function generateRealisticFileList(appData, platform, customSize) {
       { name: "config/settings.conf", size: "8192", chunks: "6" }
     ];
   } else {
-    // DLC - Use custom size or default (simplified)
+    // DLC - Use deterministic sizing
     const dlcSize = customSize || 10485760; // 10MB default
     return [
       { name: `dlc_content.bin`, size: Math.floor(dlcSize * 0.6).toString(), chunks: "1" },

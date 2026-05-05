@@ -114,29 +114,20 @@ function generateDepotConfiguration(appId, appData) {
 }
 
 /**
- * Estimates realistic game size based on app data (optimized for speed)
+ * Estimates realistic game size based on app data (completely deterministic)
  * @param {Object} appData - App data from Steam API
  * @returns {number} - Estimated size in bytes
  */
 function estimateGameSize(appData) {
-  // Simplified size estimation for speed
-  let baseSize = 10485760; // 10MB base (much smaller for speed)
+  // Completely deterministic size based only on App ID
+  // This ensures same game always generates same size regardless of API variations
+  const appId = appData.appId;
   
-  // Quick genre check (simplified)
-  if (appData.genres && Array.isArray(appData.genres)) {
-    const genreString = appData.genres.map(g => typeof g === 'string' ? g : g.description).join(' ').toLowerCase();
-    if (genreString.includes('rpg')) baseSize *= 2;
-    else if (genreString.includes('action') || genreString.includes('adventure')) baseSize *= 1.5;
-    else if (genreString.includes('simulation')) baseSize *= 1.8;
-    else if (genreString.includes('strategy')) baseSize *= 1.3;
-  }
+  // Use deterministic number based on App ID for consistent sizing
+  const sizeVariation = generateDeterministicNumber(appId, 1, 5);
+  const baseSize = 10485760 * sizeVariation; // 10MB to 50MB based on App ID
   
-  // Adjust for free games
-  if (appData.is_free) {
-    baseSize *= 0.7;
-  }
-  
-  return Math.floor(baseSize);
+  return baseSize;
 }
 
 /**
@@ -183,7 +174,7 @@ function generateManifestIds(depots, appId) {
 }
 
 /**
- * Generates DLC app IDs
+ * Generates DLC app IDs (completely deterministic)
  * @param {number} baseAppId - Base app ID
  * @param {Object} appData - App data
  * @returns {Array} - Array of DLC app IDs
@@ -196,7 +187,7 @@ function generateDlcApps(baseAppId, appData) {
     dlcApps.push({
       appId: baseAppId + 1000 + i,
       name: `${appData.name} - DLC ${i + 1}`,
-      size: generateDeterministicNumber(baseAppId + i, 536870912, 1073741824)
+      size: 10485760 * generateDeterministicNumber(baseAppId + i, 1, 3) // 10MB to 30MB deterministic
     });
   }
   
