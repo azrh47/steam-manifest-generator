@@ -249,12 +249,12 @@ function generateRealDepotManifests(appData) {
   // Use enhanced Steam API data if available
   const depotConfig = appData.depotConfig || {};
   const manifestIds = appData.manifestIds || {};
-  const buildId = appData.buildId || Math.floor(Math.random() * 9000000000) + 1000000000;
+  const buildId = appData.buildId || generateDeterministicNumber(appData.appId, 1000000000, 9000000000);
   
   // Generate main game depots using real Steam data
   Object.keys(depotConfig.depots || {}).forEach(depotKey => {
     const depot = depotConfig.depots[depotKey];
-    const manifestId = manifestIds[depotKey] || Math.floor(Math.random() * 9000000000000000000) + 1000000000000000000;
+    const manifestId = manifestIds[depotKey] || generateDeterministicNumber(appData.appId + parseInt(depotKey), 1000000000000000000, 9000000000000000000);
     const platform = depot.name.toLowerCase();
     
     manifests.push({
@@ -266,7 +266,7 @@ function generateRealDepotManifests(appData) {
   // Fallback to default depots if no enhanced data
   if (Object.keys(depotConfig.depots || {}).length === 0) {
     if (appData.platforms.windows) {
-      const manifestId = Math.floor(Math.random() * 9000000000000000000) + 1000000000000000000;
+      const manifestId = generateDeterministicNumber(appData.appId + 228980, 1000000000000000000, 9000000000000000000);
       manifests.push({
         filename: `228980_${manifestId}.manifest`,
         content: generateRealManifestContent(228980, appData, manifestId, buildId, 'windows')
@@ -274,7 +274,7 @@ function generateRealDepotManifests(appData) {
     }
     
     if (appData.platforms.mac) {
-      const manifestId = Math.floor(Math.random() * 9000000000000000000) + 1000000000000000000;
+      const manifestId = generateDeterministicNumber(appData.appId + 228981, 1000000000000000000, 9000000000000000000);
       manifests.push({
         filename: `228981_${manifestId}.manifest`,
         content: generateRealManifestContent(228981, appData, manifestId, buildId, 'mac')
@@ -282,7 +282,7 @@ function generateRealDepotManifests(appData) {
     }
     
     if (appData.platforms.linux) {
-      const manifestId = Math.floor(Math.random() * 9000000000000000000) + 1000000000000000000;
+      const manifestId = generateDeterministicNumber(appData.appId + 228982, 1000000000000000000, 9000000000000000000);
       manifests.push({
         filename: `228982_${manifestId}.manifest`,
         content: generateRealManifestContent(228982, appData, manifestId, buildId, 'linux')
@@ -293,7 +293,7 @@ function generateRealDepotManifests(appData) {
   // Generate DLC depots using enhanced data
   const dlcApps = appData.dlcApps || [];
   dlcApps.forEach((dlc, index) => {
-    const manifestId = Math.floor(Math.random() * 9000000000000000000) + 1000000000000000000;
+    const manifestId = generateDeterministicNumber(appData.appId + dlc.appId, 1000000000000000000, 9000000000000000000);
     
     manifests.push({
       filename: `${dlc.appId}_${manifestId}.manifest`,
@@ -303,10 +303,10 @@ function generateRealDepotManifests(appData) {
   
   // Fallback DLC generation if no enhanced data
   if (dlcApps.length === 0) {
-    const dlcCount = Math.floor(Math.random() * 3) + 1;
+    const dlcCount = generateDeterministicNumber(appData.appId, 1, 3);
     for (let i = 0; i < dlcCount; i++) {
-      const dlcId = Math.floor(Math.random() * 1000000) + 2000000;
-      const manifestId = Math.floor(Math.random() * 9000000000000000000) + 1000000000000000000;
+      const dlcId = generateDeterministicNumber(appData.appId + i, 2000000, 3000000);
+      const manifestId = generateDeterministicNumber(appData.appId + dlcId, 1000000000000000000, 9000000000000000000);
       
       manifests.push({
         filename: `${dlcId}_${manifestId}.manifest`,
@@ -341,11 +341,11 @@ function generateRealManifestContent(depotId, appData, manifestId, buildId, plat
   
   gameFiles.forEach((file, index) => {
     const fileNum = index + 1;
-    const hash = Array.from({length: 40}, () => Math.floor(Math.random() * 16).toString(16)).join('');
+    const hash = generateDeterministicHash(appData.appId + depotId + fileNum, 40);
     fileMapping += `\t"${file.name}"\t\t"${fileNum}"\t\t"${file.chunks}"\t\t"0"\t\t"${hash}"\n`;
     
     file.chunks.split(',').forEach(chunk => {
-      const chunkHash = Array.from({length: 40}, () => Math.floor(Math.random() * 16).toString(16)).join('');
+      const chunkHash = generateDeterministicHash(appData.appId + depotId + parseInt(chunk), 40);
       // Generate much larger chunk sizes to match file sizes
       const fileSize = parseInt(file.size);
       const chunkCount = file.chunks.split(',').length;
@@ -356,8 +356,8 @@ function generateRealManifestContent(depotId, appData, manifestId, buildId, plat
       
       // Generate realistic chunk data with actual size (reduced for performance)
       const chunkDataSize = Math.min(actualChunkSize, 1048576); // Cap at 1MB per chunk for performance
-      const chunkDataContent = Array.from({length: Math.min(chunkDataSize, 100)}, () => 
-        Array.from({length: 32}, () => Math.floor(Math.random() * 16).toString(16)).join('')
+      const chunkDataContent = Array.from({length: Math.min(chunkDataSize, 100)}, (_, i) => 
+        generateDeterministicHash(appData.appId + depotId + parseInt(chunk) + i, 32)
       ).join('');
       
       chunkData += `\t\t"${chunkHash}"\t\t"${actualChunkSize}"\t\t"${chunkDataContent}"\n`;
@@ -398,6 +398,58 @@ function generateRealManifestContent(depotId, appData, manifestId, buildId, plat
 }
 
 ${fileMapping}${fileChunks}${chunkData}`;
+}
+
+/**
+ * Generates deterministic number based on seed (App ID)
+ * @param {number} seed - Seed value (App ID)
+ * @param {number} min - Minimum value
+ * @param {number} max - Maximum value
+ * @returns {number} - Deterministic number
+ */
+function generateDeterministicNumber(seed, min, max) {
+  // Simple hash function to create deterministic pseudo-random numbers
+  const hash = (x) => {
+    x = ((x >> 16) ^ x) * 0x45d9f3b;
+    x = ((x >> 16) ^ x) * 0x45d9f3b;
+    x = (x >> 16) ^ x;
+    return x;
+  };
+  
+  const hashed = hash(seed);
+  const range = max - min + 1;
+  return Math.abs(hashed % range) + min;
+}
+
+/**
+ * Generates deterministic hash string
+ * @param {number} seed - Seed value
+ * @param {number} length - Length of hash
+ * @returns {string} - Deterministic hash
+ */
+function generateDeterministicHash(seed, length) {
+  const chars = '0123456789abcdef';
+  let result = '';
+  let currentSeed = seed;
+  
+  for (let i = 0; i < length; i++) {
+    currentSeed = hash(currentSeed);
+    result += chars[Math.abs(currentSeed) % chars.length];
+  }
+  
+  return result;
+}
+
+/**
+ * Simple hash function
+ * @param {number} x - Input value
+ * @returns {number} - Hashed value
+ */
+function hash(x) {
+  x = ((x >> 16) ^ x) * 0x45d9f3b;
+  x = ((x >> 16) ^ x) * 0x45d9f3b;
+  x = (x >> 16) ^ x;
+  return x;
 }
 
 /**

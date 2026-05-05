@@ -62,8 +62,8 @@ async function getSteamAppDetails(appId) {
       // Additional data for realistic file generation
       estimatedSize: estimateGameSize(appData),
       depotConfig: depotConfig,
-      buildId: generateRealisticBuildId(),
-      manifestIds: generateManifestIds(depotConfig.depots),
+      buildId: generateRealisticBuildId(appId),
+      manifestIds: generateManifestIds(depotConfig.depots, appId),
       dlcApps: generateDlcApps(appId, appData)
     };
     
@@ -150,22 +150,44 @@ function estimateGameSize(appData) {
 }
 
 /**
+ * Generates deterministic number based on seed
+ * @param {number} seed - Seed value
+ * @param {number} min - Minimum value
+ * @param {number} max - Maximum value
+ * @returns {number} - Deterministic number
+ */
+function generateDeterministicNumber(seed, min, max) {
+  const hash = (x) => {
+    x = ((x >> 16) ^ x) * 0x45d9f3b;
+    x = ((x >> 16) ^ x) * 0x45d9f3b;
+    x = (x >> 16) ^ x;
+    return x;
+  };
+  
+  const hashed = hash(seed);
+  const range = max - min + 1;
+  return Math.abs(hashed % range) + min;
+}
+
+/**
  * Generates realistic build ID
+ * @param {number} appId - App ID for seed
  * @returns {number} - Build ID
  */
-function generateRealisticBuildId() {
-  return Math.floor(Math.random() * 9000000000) + 1000000000;
+function generateRealisticBuildId(appId) {
+  return generateDeterministicNumber(appId, 1000000000, 9000000000);
 }
 
 /**
  * Generates manifest IDs for all depots
  * @param {Object} depots - Depot configuration
+ * @param {number} appId - App ID for seed
  * @returns {Object} - Manifest ID mapping
  */
-function generateManifestIds(depots) {
+function generateManifestIds(depots, appId) {
   const manifestIds = {};
   Object.keys(depots).forEach(depotId => {
-    manifestIds[depotId] = Math.floor(Math.random() * 9000000000000000000) + 1000000000000000000;
+    manifestIds[depotId] = generateDeterministicNumber(appId + parseInt(depotId), 1000000000000000000, 9000000000000000000);
   });
   return manifestIds;
 }
@@ -177,14 +199,14 @@ function generateManifestIds(depots) {
  * @returns {Array} - Array of DLC app IDs
  */
 function generateDlcApps(baseAppId, appData) {
-  const dlcCount = Math.floor(Math.random() * 3) + 1;
+  const dlcCount = generateDeterministicNumber(baseAppId, 1, 3);
   const dlcApps = [];
   
   for (let i = 0; i < dlcCount; i++) {
     dlcApps.push({
       appId: baseAppId + 1000 + i,
       name: `${appData.name} - DLC ${i + 1}`,
-      size: Math.floor(Math.random() * 1073741824) + 536870912
+      size: generateDeterministicNumber(baseAppId + i, 536870912, 1073741824)
     });
   }
   
