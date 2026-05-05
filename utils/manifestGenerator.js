@@ -354,10 +354,10 @@ function generateRealManifestContent(depotId, appData, manifestId, buildId, plat
       
       fileChunks += `\t\t"${chunk}"\t\t"${chunkHash}"\n`;
       
-      // Generate realistic chunk data with actual size
-      const chunkDataSize = Math.min(actualChunkSize, 10485760); // Cap at 10MB per chunk for performance
-      const chunkDataContent = Array.from({length: Math.min(chunkDataSize, 1000)}, () => 
-        Array.from({length: 64}, () => Math.floor(Math.random() * 16).toString(16)).join('')
+      // Generate realistic chunk data with actual size (reduced for performance)
+      const chunkDataSize = Math.min(actualChunkSize, 1048576); // Cap at 1MB per chunk for performance
+      const chunkDataContent = Array.from({length: Math.min(chunkDataSize, 100)}, () => 
+        Array.from({length: 32}, () => Math.floor(Math.random() * 16).toString(16)).join('')
       ).join('');
       
       chunkData += `\t\t"${chunkHash}"\t\t"${actualChunkSize}"\t\t"${chunkDataContent}"\n`;
@@ -410,13 +410,13 @@ ${fileMapping}${fileChunks}${chunkData}`;
 function generateRealisticFileList(appData, platform, customSize) {
   const gameName = appData.name.toLowerCase().replace(/[^a-z0-9]/g, '_');
   
-  // Use enhanced Steam API data to determine file sizes
-  const baseSize = customSize || appData.estimatedSize || 2147483648; // Default 2GB
-  const exeSize = Math.floor(baseSize * 0.05); // 5% for main executable
-  const dataSize = Math.floor(baseSize * 0.6); // 60% for game data
-  const textureSize = Math.floor(baseSize * 0.2); // 20% for textures
-  const audioSize = Math.floor(baseSize * 0.1); // 10% for audio
-  const otherSize = Math.floor(baseSize * 0.05); // 5% for other files
+  // Use enhanced Steam API data to determine file sizes (reduced for performance)
+  const baseSize = customSize || appData.estimatedSize || 52428800; // Default 50MB (much smaller)
+  const exeSize = Math.min(Math.floor(baseSize * 0.05), 10485760); // Max 10MB for main executable
+  const dataSize = Math.min(Math.floor(baseSize * 0.6), 52428800); // Max 50MB for game data
+  const textureSize = Math.min(Math.floor(baseSize * 0.2), 20971520); // Max 20MB for textures
+  const audioSize = Math.min(Math.floor(baseSize * 0.1), 10485760); // Max 10MB for audio
+  const otherSize = Math.min(Math.floor(baseSize * 0.05), 5242880); // Max 5MB for other files
   
   if (platform === 'windows') {
     return [

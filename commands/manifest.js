@@ -41,10 +41,24 @@ module.exports = {
     // Defer the reply since this might take some time
     await interaction.deferReply();
 
+    // Add timeout handling
+    const timeout = setTimeout(async () => {
+      try {
+        await interaction.editReply({
+          content: '⏱️ **Request Timeout**: The manifest generation is taking too long. This might be due to server issues or large game data. Please try again in a few minutes.'
+        });
+      } catch (error) {
+        console.error('Error sending timeout message:', error);
+      }
+    }, 45000); // 45 second timeout
+
     try {
-      // Fetch Steam app data
+      // Fetch Steam app data with timeout
       console.log(`Fetching Steam app details for App ID: ${appId}`);
-      const appData = await getSteamAppDetails(appId);
+      const appData = await Promise.race([
+        getSteamAppDetails(appId),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Steam API timeout')), 30000))
+      ]);
 
       // Generate real Steam files
       const manifest = generateSteamManifest(appData);
@@ -160,21 +174,22 @@ Steam Integration Ready
       console.log(`Successfully generated files for App ID ${appId} (${appData.name})`);
 
     } catch (error) {
-      console.error(`Error generating files for App ID ${appId}:`, error);
-
+      clearTimeout(timeout);
+      console.error(`Error generating manifest for App ID ${appId}:`, error);
+      
       const errorEmbed = new EmbedBuilder()
         .setColor('#FF0000')
         .setTitle('❌ Generation Failed')
-        .setDescription(`Failed to generate files for App ID **${appId}**`)
+        .setDescription(`Failed to generate manifest files for App ID **${appId}**`)
         .addFields(
           { name: 'Error Details', value: error.message || 'Unknown error occurred' },
-          { name: 'Possible Causes', value: '• Steam API is temporarily unavailable\n• App ID does not exist\n• Network connectivity issues' },
-          { name: 'Troubleshooting', value: 'Try again in a few moments, or verify the App ID exists on Steam.' }
+          { name: 'Possible Causes', value: '• Invalid App ID\n• Steam API is temporarily unavailable\n• Network connectivity issues\n• Large game data causing timeout' },
+          { name: 'Troubleshooting', value: 'Try again in a few moments, or use a different App ID.' }
         )
         .setTimestamp()
         .setFooter({ text: 'Steam Manifest Generator Bot' });
 
-      await interaction.editReply({ embeds: [errorEmbed] });
+      return await interaction.editReply({ embeds: [errorEmbed] });
     }
   }
 };
