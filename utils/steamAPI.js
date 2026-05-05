@@ -119,54 +119,57 @@ function generateDepotConfiguration(appId, appData) {
 }
 
 /**
- * Estimates realistic game size based on real Steam data
+ * Estimates realistic game size based on real Steam data (increased for realistic files)
  * @param {Object} appData - Real app data from Steam API
  * @returns {number} - Estimated size in bytes
  */
 function estimateRealGameSize(appData) {
-  // Base size estimation using real Steam game characteristics
-  let baseSize = 10485760; // 10MB base
+  // Increased base size for realistic file generation
+  let baseSize = 52428800; // 50MB base (increased from 10MB)
   
   // Adjust based on real genres from Steam
   if (appData.genres && Array.isArray(appData.genres)) {
     const genreString = appData.genres.join(' ').toLowerCase();
-    if (genreString.includes('rpg')) baseSize *= 3;
-    else if (genreString.includes('action') || genreString.includes('adventure')) baseSize *= 2;
-    else if (genreString.includes('simulation')) baseSize *= 2.5;
-    else if (genreString.includes('strategy')) baseSize *= 1.5;
-    else if (genreString.includes('indie')) baseSize *= 0.8;
-    else if (genreString.includes('sports') || genreString.includes('racing')) baseSize *= 1.8;
-    else if (genreString.includes('mmorpg')) baseSize *= 4;
+    if (genreString.includes('rpg')) baseSize *= 4; // RPGs are large
+    else if (genreString.includes('action') || genreString.includes('adventure')) baseSize *= 3;
+    else if (genreString.includes('simulation')) baseSize *= 3.5;
+    else if (genreString.includes('strategy')) baseSize *= 2;
+    else if (genreString.includes('indie')) baseSize *= 1.5;
+    else if (genreString.includes('sports') || genreString.includes('racing')) baseSize *= 2.5;
+    else if (genreString.includes('mmorpg')) baseSize *= 5; // MMOs are huge
+    else if (genreString.includes('shooter')) baseSize *= 2.5;
   }
   
   // Adjust for real game type
   if (appData.type === 'game') {
-    baseSize *= 1.2;
+    baseSize *= 1.5;
   } else if (appData.type === 'software') {
-    baseSize *= 0.5;
+    baseSize *= 0.7;
   }
   
   // Adjust for free games (usually smaller)
   if (appData.is_free) {
-    baseSize *= 0.6;
+    baseSize *= 0.8;
   }
   
   // Adjust based on real DLC count (more DLC = larger base game)
   if (appData.dlcCount > 0) {
-    baseSize *= (1 + appData.dlcCount * 0.1);
+    baseSize *= (1 + appData.dlcCount * 0.15);
   }
   
   // Adjust based on real achievements (more achievements = larger game)
   if (appData.achievements && appData.achievements.total > 0) {
-    baseSize *= (1 + appData.achievements.total * 0.001);
+    baseSize *= (1 + appData.achievements.total * 0.002);
   }
   
-  // Make it deterministic based on App ID
+  // Make it deterministic based on App ID but ensure realistic sizes
   const appId = appData.appId || 0;
-  const sizeVariation = generateDeterministicNumber(appId, 1, 3);
+  const sizeVariation = generateDeterministicNumber(appId, 2, 4); // Increased range
   baseSize *= sizeVariation;
   
-  return Math.floor(baseSize);
+  // Ensure minimum realistic size
+  const finalSize = Math.floor(baseSize);
+  return Math.max(finalSize, 52428800); // Minimum 50MB for realistic files
 }
 
 /**
@@ -235,9 +238,9 @@ function generateDlcApps(baseAppId, appData) {
   if (appData.dlc && Array.isArray(appData.dlc) && appData.dlc.length > 0) {
     console.log(`Using real DLC data for ${appData.dlc.length} DLC items`);
     
-    // Use real Steam DLC data
+    // Use real Steam DLC data with increased sizes
     appData.dlc.slice(0, 5).forEach((dlcId, index) => {
-      const dlcSize = 10485760 * generateDeterministicNumber(baseAppId + dlcId, 1, 4); // 10MB to 40MB
+      const dlcSize = 52428800 * generateDeterministicNumber(baseAppId + dlcId, 1, 3); // 50MB to 150MB
       dlcApps.push({
         appId: dlcId,
         name: `${appData.name} - DLC ${index + 1}`,
@@ -254,7 +257,7 @@ function generateDlcApps(baseAppId, appData) {
       dlcApps.push({
         appId: baseAppId + 1000 + i,
         name: `${appData.name} - DLC ${i + 1}`,
-        size: 10485760 * generateDeterministicNumber(baseAppId + i, 1, 3), // 10MB to 30MB deterministic
+        size: 52428800 * generateDeterministicNumber(baseAppId + i, 1, 2), // 50MB to 100MB deterministic
         isRealDLC: false
       });
     }
