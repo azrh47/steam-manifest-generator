@@ -114,34 +114,24 @@ function generateDepotConfiguration(appId, appData) {
 }
 
 /**
- * Estimates realistic game size based on app data
+ * Estimates realistic game size based on app data (optimized for speed)
  * @param {Object} appData - App data from Steam API
  * @returns {number} - Estimated size in bytes
  */
 function estimateGameSize(appData) {
-  // Base size estimation based on game type and content
-  let baseSize = 1073741824; // 1GB base
+  // Simplified size estimation for speed
+  let baseSize = 10485760; // 10MB base (much smaller for speed)
   
-  // Adjust based on genres
+  // Quick genre check (simplified)
   if (appData.genres && Array.isArray(appData.genres)) {
-    appData.genres.forEach(genre => {
-      const genreName = typeof genre === 'string' ? genre : genre.description;
-      if (genreName.includes('Action') || genreName.includes('Adventure')) {
-        baseSize *= 1.5;
-      }
-      if (genreName.includes('RPG')) {
-        baseSize *= 2;
-      }
-      if (genreName.includes('Strategy')) {
-        baseSize *= 1.3;
-      }
-      if (genreName.includes('Simulation')) {
-        baseSize *= 1.8;
-      }
-    });
+    const genreString = appData.genres.map(g => typeof g === 'string' ? g : g.description).join(' ').toLowerCase();
+    if (genreString.includes('rpg')) baseSize *= 2;
+    else if (genreString.includes('action') || genreString.includes('adventure')) baseSize *= 1.5;
+    else if (genreString.includes('simulation')) baseSize *= 1.8;
+    else if (genreString.includes('strategy')) baseSize *= 1.3;
   }
   
-  // Adjust for free games (usually smaller)
+  // Adjust for free games
   if (appData.is_free) {
     baseSize *= 0.7;
   }

@@ -346,21 +346,14 @@ function generateRealManifestContent(depotId, appData, manifestId, buildId, plat
     
     file.chunks.split(',').forEach(chunk => {
       const chunkHash = generateDeterministicHash(appData.appId + depotId + parseInt(chunk), 40);
-      // Generate much larger chunk sizes to match file sizes
       const fileSize = parseInt(file.size);
-      const chunkCount = file.chunks.split(',').length;
-      const chunkSize = Math.floor(fileSize / chunkCount);
-      const actualChunkSize = Math.max(chunkSize, 1048576); // Minimum 1MB per chunk
       
       fileChunks += `\t\t"${chunk}"\t\t"${chunkHash}"\n`;
       
-      // Generate realistic chunk data with actual size (reduced for performance)
-      const chunkDataSize = Math.min(actualChunkSize, 1048576); // Cap at 1MB per chunk for performance
-      const chunkDataContent = Array.from({length: Math.min(chunkDataSize, 100)}, (_, i) => 
-        generateDeterministicHash(appData.appId + depotId + parseInt(chunk) + i, 32)
-      ).join('');
+      // Simplified chunk data generation for speed
+      const chunkDataContent = generateDeterministicHash(appData.appId + depotId + parseInt(chunk), 64);
       
-      chunkData += `\t\t"${chunkHash}"\t\t"${actualChunkSize}"\t\t"${chunkDataContent}"\n`;
+      chunkData += `\t\t"${chunkHash}"\t\t"${fileSize}"\t\t"${chunkDataContent}"\n`;
     });
   });
   
@@ -462,66 +455,50 @@ function hash(x) {
 function generateRealisticFileList(appData, platform, customSize) {
   const gameName = appData.name.toLowerCase().replace(/[^a-z0-9]/g, '_');
   
-  // Use enhanced Steam API data to determine file sizes (reduced for performance)
-  const baseSize = customSize || appData.estimatedSize || 52428800; // Default 50MB (much smaller)
-  const exeSize = Math.min(Math.floor(baseSize * 0.05), 10485760); // Max 10MB for main executable
-  const dataSize = Math.min(Math.floor(baseSize * 0.6), 52428800); // Max 50MB for game data
-  const textureSize = Math.min(Math.floor(baseSize * 0.2), 20971520); // Max 20MB for textures
-  const audioSize = Math.min(Math.floor(baseSize * 0.1), 10485760); // Max 10MB for audio
-  const otherSize = Math.min(Math.floor(baseSize * 0.05), 5242880); // Max 5MB for other files
+  // Use enhanced Steam API data to determine file sizes (optimized for speed)
+  const baseSize = customSize || appData.estimatedSize || 10485760; // Default 10MB (much smaller)
+  const exeSize = Math.min(Math.floor(baseSize * 0.05), 1048576); // Max 1MB for main executable
+  const dataSize = Math.min(Math.floor(baseSize * 0.6), 5242880); // Max 5MB for game data
+  const textureSize = Math.min(Math.floor(baseSize * 0.2), 2097152); // Max 2MB for textures
+  const audioSize = Math.min(Math.floor(baseSize * 0.1), 1048576); // Max 1MB for audio
+  const otherSize = Math.min(Math.floor(baseSize * 0.05), 524288); // Max 512KB for other files
   
   if (platform === 'windows') {
     return [
-      { name: `${gameName}.exe`, size: exeSize.toString(), chunks: Array.from({length: Math.ceil(exeSize / 1048576)}, (_, i) => i + 1).join(',') },
-      { name: "steam_api.dll", size: "2097152", chunks: Array.from({length: 2}, (_, i) => Math.ceil(exeSize / 1048576) + 1 + i).join(',') },
-      { name: "steam_api64.dll", size: "4194304", chunks: Array.from({length: 4}, (_, i) => Math.ceil(exeSize / 1048576) + 3 + i).join(',') },
-      { name: "game_data.bin", size: dataSize.toString(), chunks: Array.from({length: Math.ceil(dataSize / 1048576)}, (_, i) => Math.ceil(exeSize / 1048576) + 7 + i).join(',') },
-      { name: "resources/textures.dat", size: textureSize.toString(), chunks: Array.from({length: Math.ceil(textureSize / 1048576)}, (_, i) => Math.ceil(exeSize / 1048576) + Math.ceil(dataSize / 1048576) + 7 + i).join(',') },
-      { name: "resources/models.bin", size: Math.floor(textureSize * 0.5).toString(), chunks: Array.from({length: Math.ceil(textureSize * 0.5 / 1048576)}, (_, i) => Math.ceil(exeSize / 1048576) + Math.ceil(dataSize / 1048576) + Math.ceil(textureSize / 1048576) + 7 + i).join(',') },
-      { name: "audio/sounds.wem", size: Math.floor(audioSize * 0.6).toString(), chunks: Array.from({length: Math.ceil(audioSize * 0.6 / 1048576)}, (_, i) => Math.ceil(exeSize / 1048576) + Math.ceil(dataSize / 1048576) + Math.ceil(textureSize / 1048576) + Math.ceil(textureSize * 0.5 / 1048576) + 7 + i).join(',') },
-      { name: "audio/music.wem", size: Math.floor(audioSize * 0.4).toString(), chunks: Array.from({length: Math.ceil(audioSize * 0.4 / 1048576)}, (_, i) => Math.ceil(exeSize / 1048576) + Math.ceil(dataSize / 1048576) + Math.ceil(textureSize / 1048576) + Math.ceil(textureSize * 0.5 / 1048576) + Math.ceil(audioSize * 0.6 / 1048576) + 7 + i).join(',') },
-      { name: "config/settings.ini", size: "8192", chunks: (Math.ceil(exeSize / 1048576) + Math.ceil(dataSize / 1048576) + Math.ceil(textureSize / 1048576) + Math.ceil(textureSize * 0.5 / 1048576) + Math.ceil(audioSize * 0.6 / 1048576) + Math.ceil(audioSize * 0.4 / 1048576) + 8).toString() },
-      { name: "binaries/launcher.exe", size: "2097152", chunks: Array.from({length: 2}, (_, i) => Math.ceil(exeSize / 1048576) + Math.ceil(dataSize / 1048576) + Math.ceil(textureSize / 1048576) + Math.ceil(textureSize * 0.5 / 1048576) + Math.ceil(audioSize * 0.6 / 1048576) + Math.ceil(audioSize * 0.4 / 1048576) + 9 + i).join(',') },
-      { name: "binaries/unityplayer.dll", size: Math.floor(otherSize * 0.3).toString(), chunks: Array.from({length: Math.ceil(otherSize * 0.3 / 1048576)}, (_, i) => Math.ceil(exeSize / 1048576) + Math.ceil(dataSize / 1048576) + Math.ceil(textureSize / 1048576) + Math.ceil(textureSize * 0.5 / 1048576) + Math.ceil(audioSize * 0.6 / 1048576) + Math.ceil(audioSize * 0.4 / 1048576) + 11 + i).join(',') },
-      { name: "data/levels/main.unity", size: Math.floor(otherSize * 0.2).toString(), chunks: Array.from({length: Math.ceil(otherSize * 0.2 / 1048576)}, (_, i) => Math.ceil(exeSize / 1048576) + Math.ceil(dataSize / 1048576) + Math.ceil(textureSize / 1048576) + Math.ceil(textureSize * 0.5 / 1048576) + Math.ceil(audioSize * 0.6 / 1048576) + Math.ceil(audioSize * 0.4 / 1048576) + Math.ceil(otherSize * 0.3 / 1048576) + 11 + i).join(',') },
-      { name: "data/shaders/bundle", size: Math.floor(otherSize * 0.1).toString(), chunks: Array.from({length: Math.ceil(otherSize * 0.1 / 1048576)}, (_, i) => Math.ceil(exeSize / 1048576) + Math.ceil(dataSize / 1048576) + Math.ceil(textureSize / 1048576) + Math.ceil(textureSize * 0.5 / 1048576) + Math.ceil(audioSize * 0.6 / 1048576) + Math.ceil(audioSize * 0.4 / 1048576) + Math.ceil(otherSize * 0.3 / 1048576) + Math.ceil(otherSize * 0.2 / 1048576) + 11 + i).join(',') },
-      { name: "localization/en.json", size: "1048576", chunks: (Math.ceil(exeSize / 1048576) + Math.ceil(dataSize / 1048576) + Math.ceil(textureSize / 1048576) + Math.ceil(textureSize * 0.5 / 1048576) + Math.ceil(audioSize * 0.6 / 1048576) + Math.ceil(audioSize * 0.4 / 1048576) + Math.ceil(otherSize * 0.3 / 1048576) + Math.ceil(otherSize * 0.2 / 1048576) + Math.ceil(otherSize * 0.1 / 1048576) + 12).toString() },
-      { name: "plugins/bepinex.dll", size: Math.floor(otherSize * 0.4).toString(), chunks: Array.from({length: Math.ceil(otherSize * 0.4 / 1048576)}, (_, i) => Math.ceil(exeSize / 1048576) + Math.ceil(dataSize / 1048576) + Math.ceil(textureSize / 1048576) + Math.ceil(textureSize * 0.5 / 1048576) + Math.ceil(audioSize * 0.6 / 1048576) + Math.ceil(audioSize * 0.4 / 1048576) + Math.ceil(otherSize * 0.3 / 1048576) + Math.ceil(otherSize * 0.2 / 1048576) + Math.ceil(otherSize * 0.1 / 1048576) + 13 + i).join(',') }
+      { name: `${gameName}.exe`, size: exeSize.toString(), chunks: "1" },
+      { name: "steam_api.dll", size: "2097152", chunks: "2" },
+      { name: "steam_api64.dll", size: "4194304", chunks: "3" },
+      { name: "game_data.bin", size: dataSize.toString(), chunks: "4" },
+      { name: "resources/textures.dat", size: textureSize.toString(), chunks: "5" },
+      { name: "audio/sounds.wem", size: Math.floor(audioSize * 0.6).toString(), chunks: "6" },
+      { name: "config/settings.ini", size: "8192", chunks: "7" }
     ];
   } else if (platform === 'mac') {
     return [
-      { name: `${gameName}.app`, size: exeSize.toString(), chunks: Array.from({length: Math.ceil(exeSize / 1048576)}, (_, i) => i + 1).join(',') },
-      { name: "steam_api.dylib", size: "2097152", chunks: Array.from({length: 2}, (_, i) => Math.ceil(exeSize / 1048576) + 1 + i).join(',') },
-      { name: "game_data.bin", size: dataSize.toString(), chunks: Array.from({length: Math.ceil(dataSize / 1048576)}, (_, i) => Math.ceil(exeSize / 1048576) + 3 + i).join(',') },
-      { name: "resources/textures.dat", size: textureSize.toString(), chunks: Array.from({length: Math.ceil(textureSize / 1048576)}, (_, i) => Math.ceil(exeSize / 1048576) + Math.ceil(dataSize / 1048576) + 3 + i).join(',') },
-      { name: "resources/models.bin", size: Math.floor(textureSize * 0.5).toString(), chunks: Array.from({length: Math.ceil(textureSize * 0.5 / 1048576)}, (_, i) => Math.ceil(exeSize / 1048576) + Math.ceil(dataSize / 1048576) + Math.ceil(textureSize / 1048576) + 3 + i).join(',') },
-      { name: "audio/sounds.wem", size: Math.floor(audioSize * 0.6).toString(), chunks: Array.from({length: Math.ceil(audioSize * 0.6 / 1048576)}, (_, i) => Math.ceil(exeSize / 1048576) + Math.ceil(dataSize / 1048576) + Math.ceil(textureSize / 1048576) + Math.ceil(textureSize * 0.5 / 1048576) + 3 + i).join(',') },
-      { name: "audio/music.wem", size: Math.floor(audioSize * 0.4).toString(), chunks: Array.from({length: Math.ceil(audioSize * 0.4 / 1048576)}, (_, i) => Math.ceil(exeSize / 1048576) + Math.ceil(dataSize / 1048576) + Math.ceil(textureSize / 1048576) + Math.ceil(textureSize * 0.5 / 1048576) + Math.ceil(audioSize * 0.6 / 1048576) + 3 + i).join(',') },
-      { name: "config/settings.plist", size: "8192", chunks: (Math.ceil(exeSize / 1048576) + Math.ceil(dataSize / 1048576) + Math.ceil(textureSize / 1048576) + Math.ceil(textureSize * 0.5 / 1048576) + Math.ceil(audioSize * 0.6 / 1048576) + Math.ceil(audioSize * 0.4 / 1048576) + 4).toString() },
-      { name: "Frameworks/UnityFramework.framework", size: otherSize.toString(), chunks: Array.from({length: Math.ceil(otherSize / 1048576)}, (_, i) => Math.ceil(exeSize / 1048576) + Math.ceil(dataSize / 1048576) + Math.ceil(textureSize / 1048576) + Math.ceil(textureSize * 0.5 / 1048576) + Math.ceil(audioSize * 0.6 / 1048576) + Math.ceil(audioSize * 0.4 / 1048576) + 5 + i).join(',') }
+      { name: `${gameName}.app`, size: exeSize.toString(), chunks: "1" },
+      { name: "steam_api.dylib", size: "2097152", chunks: "2" },
+      { name: "game_data.bin", size: dataSize.toString(), chunks: "3" },
+      { name: "resources/textures.dat", size: textureSize.toString(), chunks: "4" },
+      { name: "audio/sounds.wem", size: Math.floor(audioSize * 0.6).toString(), chunks: "5" },
+      { name: "config/settings.plist", size: "8192", chunks: "6" }
     ];
   } else if (platform === 'linux') {
     return [
-      { name: `${gameName}.x86_64`, size: exeSize.toString(), chunks: Array.from({length: Math.ceil(exeSize / 1048576)}, (_, i) => i + 1).join(',') },
-      { name: "steam_api.so", size: "2097152", chunks: Array.from({length: 2}, (_, i) => Math.ceil(exeSize / 1048576) + 1 + i).join(',') },
-      { name: "game_data.bin", size: dataSize.toString(), chunks: Array.from({length: Math.ceil(dataSize / 1048576)}, (_, i) => Math.ceil(exeSize / 1048576) + 3 + i).join(',') },
-      { name: "resources/textures.dat", size: textureSize.toString(), chunks: Array.from({length: Math.ceil(textureSize / 1048576)}, (_, i) => Math.ceil(exeSize / 1048576) + Math.ceil(dataSize / 1048576) + 3 + i).join(',') },
-      { name: "resources/models.bin", size: Math.floor(textureSize * 0.5).toString(), chunks: Array.from({length: Math.ceil(textureSize * 0.5 / 1048576)}, (_, i) => Math.ceil(exeSize / 1048576) + Math.ceil(dataSize / 1048576) + Math.ceil(textureSize / 1048576) + 3 + i).join(',') },
-      { name: "audio/sounds.wem", size: Math.floor(audioSize * 0.6).toString(), chunks: Array.from({length: Math.ceil(audioSize * 0.6 / 1048576)}, (_, i) => Math.ceil(exeSize / 1048576) + Math.ceil(dataSize / 1048576) + Math.ceil(textureSize / 1048576) + Math.ceil(textureSize * 0.5 / 1048576) + 3 + i).join(',') },
-      { name: "audio/music.wem", size: Math.floor(audioSize * 0.4).toString(), chunks: Array.from({length: Math.ceil(audioSize * 0.4 / 1048576)}, (_, i) => Math.ceil(exeSize / 1048576) + Math.ceil(dataSize / 1048576) + Math.ceil(textureSize / 1048576) + Math.ceil(textureSize * 0.5 / 1048576) + Math.ceil(audioSize * 0.6 / 1048576) + 3 + i).join(',') },
-      { name: "config/settings.conf", size: "8192", chunks: (Math.ceil(exeSize / 1048576) + Math.ceil(dataSize / 1048576) + Math.ceil(textureSize / 1048576) + Math.ceil(textureSize * 0.5 / 1048576) + Math.ceil(audioSize * 0.6 / 1048576) + Math.ceil(audioSize * 0.4 / 1048576) + 4).toString() },
-      { name: "lib/unityplayer.so", size: otherSize.toString(), chunks: Array.from({length: Math.ceil(otherSize / 1048576)}, (_, i) => Math.ceil(exeSize / 1048576) + Math.ceil(dataSize / 1048576) + Math.ceil(textureSize / 1048576) + Math.ceil(textureSize * 0.5 / 1048576) + Math.ceil(audioSize * 0.6 / 1048576) + Math.ceil(audioSize * 0.4 / 1048576) + 5 + i).join(',') }
+      { name: `${gameName}.x86_64`, size: exeSize.toString(), chunks: "1" },
+      { name: "steam_api.so", size: "2097152", chunks: "2" },
+      { name: "game_data.bin", size: dataSize.toString(), chunks: "3" },
+      { name: "resources/textures.dat", size: textureSize.toString(), chunks: "4" },
+      { name: "audio/sounds.wem", size: Math.floor(audioSize * 0.6).toString(), chunks: "5" },
+      { name: "config/settings.conf", size: "8192", chunks: "6" }
     ];
   } else {
-    // DLC - Use custom size or default
-    const dlcSize = customSize || 1073741824;
+    // DLC - Use custom size or default (simplified)
+    const dlcSize = customSize || 10485760; // 10MB default
     return [
-      { name: `dlc_content.bin`, size: Math.floor(dlcSize * 0.6).toString(), chunks: Array.from({length: Math.ceil(dlcSize * 0.6 / 1048576)}, (_, i) => i + 1).join(',') },
-      { name: `dlc_textures.dat`, size: Math.floor(dlcSize * 0.3).toString(), chunks: Array.from({length: Math.ceil(dlcSize * 0.3 / 1048576)}, (_, i) => Math.ceil(dlcSize * 0.6 / 1048576) + 1 + i).join(',') },
-      { name: `dlc_models.bin`, size: Math.floor(dlcSize * 0.15).toString(), chunks: Array.from({length: Math.ceil(dlcSize * 0.15 / 1048576)}, (_, i) => Math.ceil(dlcSize * 0.6 / 1048576) + Math.ceil(dlcSize * 0.3 / 1048576) + 1 + i).join(',') },
-      { name: `dlc_audio.wem`, size: Math.floor(dlcSize * 0.1).toString(), chunks: Array.from({length: Math.ceil(dlcSize * 0.1 / 1048576)}, (_, i) => Math.ceil(dlcSize * 0.6 / 1048576) + Math.ceil(dlcSize * 0.3 / 1048576) + Math.ceil(dlcSize * 0.15 / 1048576) + 1 + i).join(',') },
-      { name: `dlc_music.wem`, size: Math.floor(dlcSize * 0.05).toString(), chunks: Array.from({length: Math.ceil(dlcSize * 0.05 / 1048576)}, (_, i) => Math.ceil(dlcSize * 0.6 / 1048576) + Math.ceil(dlcSize * 0.3 / 1048576) + Math.ceil(dlcSize * 0.15 / 1048576) + Math.ceil(dlcSize * 0.1 / 1048576) + 1 + i).join(',') },
-      { name: `dlc_config.json`, size: "16384", chunks: (Math.ceil(dlcSize * 0.6 / 1048576) + Math.ceil(dlcSize * 0.3 / 1048576) + Math.ceil(dlcSize * 0.15 / 1048576) + Math.ceil(dlcSize * 0.1 / 1048576) + Math.ceil(dlcSize * 0.05 / 1048576) + 2).toString() }
+      { name: `dlc_content.bin`, size: Math.floor(dlcSize * 0.6).toString(), chunks: "1" },
+      { name: `dlc_textures.dat`, size: Math.floor(dlcSize * 0.3).toString(), chunks: "2" },
+      { name: `dlc_audio.wem`, size: Math.floor(dlcSize * 0.1).toString(), chunks: "3" },
+      { name: `dlc_config.json`, size: "16384", chunks: "4" }
     ];
   }
 }
