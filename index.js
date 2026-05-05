@@ -62,15 +62,33 @@ client.on(Events.InteractionCreate, async interaction => {
   } catch (error) {
     console.error(`Error executing ${interaction.commandName}:`, error);
     
+    // Handle specific Discord API errors
+    if (error.code === 10062) {
+      // Unknown interaction - Discord timed out, nothing we can do
+      console.log('Interaction expired (Discord timeout), skipping response');
+      return;
+    }
+    
+    if (error.code === 40060) {
+      // Interaction already acknowledged - skip response
+      console.log('Interaction already acknowledged, skipping response');
+      return;
+    }
+    
     const errorMessage = {
       content: '❌ There was an error while executing this command!',
-      ephemeral: true
+      flags: [4096] // Use flags instead of deprecated ephemeral
     };
 
-    if (interaction.replied || interaction.deferred) {
-      await interaction.followUp(errorMessage);
-    } else {
-      await interaction.reply(errorMessage);
+    try {
+      if (interaction.replied || interaction.deferred) {
+        await interaction.followUp(errorMessage);
+      } else {
+        await interaction.reply(errorMessage);
+      }
+    } catch (followUpError) {
+      // If we can't even send an error message, just log it
+      console.error('Failed to send error message:', followUpError);
     }
   }
 });

@@ -35,7 +35,7 @@ module.exports = {
         .setTimestamp()
         .setFooter({ text: 'Steam Manifest Generator Bot' });
 
-      return await interaction.reply({ embeds: [errorEmbed], ephemeral: true });
+      return await interaction.reply({ embeds: [errorEmbed], flags: [4096] });
     }
 
     // Defer the reply since this might take some time
@@ -44,11 +44,17 @@ module.exports = {
     // Add timeout handling
     const timeout = setTimeout(async () => {
       try {
-        await interaction.editReply({
-          content: '⏱️ **Request Timeout**: The manifest generation is taking too long. This might be due to server issues or large game data. Please try again in a few minutes.'
-        });
+        // Check if interaction is still valid before trying to edit
+        if (!interaction.ended) {
+          await interaction.editReply({
+            content: '⏱️ **Request Timeout**: The manifest generation is taking too long. This might be due to server issues or large game data. Please try again in a few minutes.'
+          });
+        }
       } catch (error) {
-        console.error('Error sending timeout message:', error);
+        // Ignore "Unknown interaction" errors as they're expected after timeout
+        if (error.code !== 10062) {
+          console.error('Error sending timeout message:', error);
+        }
       }
     }, 45000); // 45 second timeout
 
