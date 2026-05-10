@@ -5,9 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "deploy": "node config/deploy-commands.js",
-    "build": "next build",
-    "dev": "next dev"
+    "deploy": "node config/deploy-commands.js"
   },
   "keywords": [
     "discord",
@@ -29,21 +27,12 @@
   },
   "homepage": "https://github.com/azrh47/steam-manifest-generator#readme",
   "dependencies": {
-    "@supabase/supabase-js": "^2.105.3",
     "archiver": "^6.0.1",
     "axios": "^1.6.2",
     "discord.js": "^14.14.1",
-    "dotenv": "^16.3.1",
-    "next": "^14.0.0",
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0"
+    "dotenv": "^16.3.1"
   },
   "engines": {
     "node": "20.x"
-  },
-  "devDependencies": {
-    "@types/node": "^25.6.0",
-    "@types/react": "^19.2.14",
-    "typescript": "^6.0.3"
   }
 }
