@@ -2,7 +2,6 @@ const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { getSteamAppDetails, validateAppId } = require('../utils/steamAPI');
 const { generateRealSteamManifests, generateRealAppManifest } = require('../utils/realManifestGenerator');
 const { generateLuaScript, generateVDFKeys } = require('../utils/manifestGenerator');
-const { generateLuaScript } = require('../utils/luaGenerator');
 const { generateKeyVDF } = require('../utils/keyGenerator');
 // Temporarily disabled real manifest fetching to fix deployment
 // const RealManifestFetcher = require('../utils/realManifestFetcher');
