@@ -455,5 +455,6 @@ module.exports = {
   generateManifestId,
   generateBuildId,
   getWebApiData,
-  searchSteamGames
+  searchSteamGames,
+  generateDeterministicNumber
 };
