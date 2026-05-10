@@ -1,36 +1,24 @@
 {
   "name": "steam-manifest-generator",
-  "version": "2.0.0",
-  "description": "A Discord bot that generates Steam app manifests and Lua scripts with real Steam API data",
+  "version": "1.0.0",
+  "description": "A simple Discord bot that generates Steam manifest files",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "deploy": "node config/deploy-commands.js"
+    "start": "node index.js"
   },
   "keywords": [
     "discord",
     "bot",
     "steam",
     "manifest",
-    "lua",
-    "generator",
-    "steamtools"
+    "generator"
   ],
   "author": "Steam Manifest Generator",
   "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/azrh47/steam-manifest-generator"
-  },
-  "bugs": {
-    "url": "https://github.com/azrh47/steam-manifest-generator/issues"
-  },
-  "homepage": "https://github.com/azrh47/steam-manifest-generator#readme",
   "dependencies": {
-    "archiver": "^6.0.1",
     "axios": "^1.6.2",
     "discord.js": "^14.14.1",
-    "dotenv": "^16.3.1"
+    "archiver": "^6.0.1"
   },
   "engines": {
     "node": "20.x"
