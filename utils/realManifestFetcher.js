@@ -26,7 +26,8 @@ class RealManifestFetcher {
    */
   async authenticate() {
     if (!this.steamUsername || !this.steamPassword) {
-      throw new Error('Steam credentials required. Set STEAM_USERNAME and STEAM_PASSWORD environment variables.');
+      console.warn('⚠️ Steam credentials not found, using fallback mode');
+      return false; // Fallback to generated files
     }
 
     try {
@@ -61,7 +62,8 @@ class RealManifestFetcher {
         console.log('✅ Steam authentication successful');
         return true;
       } else {
-        throw new Error('Steam login failed: ' + JSON.stringify(loginResponse.data));
+        console.warn('⚠️ Steam login failed, using fallback mode');
+        return false; // Fallback to generated files
       }
     } catch (error) {
       console.error('❌ Steam authentication failed:', error.message);
@@ -80,7 +82,15 @@ class RealManifestFetcher {
     }
 
     try {
-      console.log(`🔍 Fetching real manifests for App ID: ${appId}`);
+      console.log(`🔍 Attempting to fetch real manifests for App ID: ${appId}`);
+
+      // Check if we have Steam credentials
+      const isAuthenticated = await this.authenticate();
+      
+      if (!isAuthenticated) {
+        console.log('⚠️ No Steam credentials, falling back to generated manifests');
+        return null; // Signal to use fallback
+      }
 
       // Step 1: Get app info from Steam API
       const appInfoResponse = await axios.get(`https://store.steampowered.com/api/appdetails?appids=${appId}`);
