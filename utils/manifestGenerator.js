@@ -393,26 +393,6 @@ function generateRealManifestContent(depotId, appData, manifestId, buildId, plat
 ${fileMapping}${fileChunks}${chunkData}`;
 }
 
-/**
- * Generates deterministic number based on seed (App ID)
- * @param {number} seed - Seed value (App ID)
- * @param {number} min - Minimum value
- * @param {number} max - Maximum value
- * @returns {number} - Deterministic number
- */
-function generateDeterministicNumber(seed, min, max) {
-  // Simple hash function to create deterministic pseudo-random numbers
-  const hash = (x) => {
-    x = ((x >> 16) ^ x) * 0x45d9f3b;
-    x = ((x >> 16) ^ x) * 0x45d9f3b;
-    x = (x >> 16) ^ x;
-    return x;
-  };
-  
-  const hashed = hash(seed);
-  const range = max - min + 1;
-  return Math.abs(hashed % range) + min;
-}
 
 /**
  * Generates deterministic hash string
