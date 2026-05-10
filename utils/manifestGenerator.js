@@ -1,4 +1,4 @@
-const { generateManifestId, generateBuildId } = require('./steamAPI');
+const { generateManifestId, generateBuildId, generateDeterministicNumber } = require('./steamAPI');
 
 /**
  * Generates educational Steam app manifest template based on app data
