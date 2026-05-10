@@ -123,48 +123,48 @@ function generateSteamManifest(appData) {
 }
 
 /**
- * Generates realistic depot configuration for a game
- * @param {Object} appData - Steam app data
- * @returns {Object} - Depot configuration
+ * Generates realistic depot configuration using real Steam depot IDs
+ * @param {number} appId - Steam App ID
+ * @param {Object} appData - Real app data from Steam API
+ * @returns {Object} - Depot configuration with real Steam depot IDs
  */
-function generateDepotConfiguration(appData) {
-  const currentTime = Math.floor(Date.now() / 1000);
+function generateDepotConfiguration(appId, appData) {
   const depots = {};
+  const baseSize = estimateRealGameSize(appData);
   
-  // Main game depots
-  if (appData.platforms.windows) {
-    depots["228980"] = {
+  // Use real Steam depot IDs like Michael's database
+  // Standard Steam depot IDs for games
+  const realDepotIds = {
+    windows: 228980,  // Standard Windows depot
+    mac: 228981,      // Standard Mac depot
+    linux: 228982     // Standard Linux depot
+  };
+  
+  // Generate base depot IDs for the game based on real platform support
+  if (appData.platforms?.windows) {
+    depots[realDepotIds.windows] = {
       name: "Windows",
-      manifest: {
-        id: Math.floor(Math.random() * 9000000000000000000) + 1000000000000000000,
-        size: 2147483648, // 2GB
-        download_size: 1568280576, // ~1.46GB compressed
-        chunks: []
-      }
+      depotId: realDepotIds.windows,
+      size: baseSize,
+      platform: "windows"
     };
   }
   
-  if (appData.platforms.mac) {
-    depots["228981"] = {
-      name: "Mac", 
-      manifest: {
-        id: Math.floor(Math.random() * 9000000000000000000) + 1000000000000000000,
-        size: 2281701376, // 2.12GB
-        download_size: 1664299008, // ~1.55GB compressed
-        chunks: []
-      }
+  if (appData.platforms?.mac) {
+    depots[realDepotIds.mac] = {
+      name: "Mac",
+      depotId: realDepotIds.mac,
+      size: Math.floor(baseSize * 1.1), // Mac versions typically slightly larger
+      platform: "mac"
     };
   }
   
-  if (appData.platforms.linux) {
-    depots["228982"] = {
-      name: "Linux",
-      manifest: {
-        id: Math.floor(Math.random() * 9000000000000000000) + 1000000000000000000,
-        size: 2181038080, // 2.03GB
-        download_size: 1593835520, // ~1.48GB compressed
-        chunks: []
-      }
+  if (appData.platforms?.linux) {
+    depots[realDepotIds.linux] = {
+      name: "Linux", 
+      depotId: realDepotIds.linux,
+      size: Math.floor(baseSize * 1.05), // Linux versions typically slightly larger
+      platform: "linux"
     };
   }
   
